@@ -4301,6 +4301,7 @@ int main(int, char* [])
 //	//创建切割平面，设置中点和法线方向
 //	auto clipPlane = vtkSmartPointer<vtkPlane>::New();
 //	clipPlane->SetOrigin(reader->GetOutput()->GetCenter());
+//	//clipPlane->SetOrigin(0.5,0.5,1);
 //	clipPlane->SetNormal(xnorm);
 //
 //	//创建切割面数据
@@ -4333,7 +4334,8 @@ int main(int, char* [])
 //	insideActor->SetMapper(insideMapper);
 //	//insideActor->GetProperty()->SetDiffuseColor(colors->GetColor3d("banana").GetData());
 //	insideActor->GetProperty()->SetAmbient(.3);
-//	insideActor->GetProperty()->EdgeVisibilityOn();
+//	//设置是否显示网格
+//	//insideActor->GetProperty()->EdgeVisibilityOn();
 //
 //
 //
@@ -4378,44 +4380,7 @@ int main(int, char* [])
 //
 //	interactor->Start();
 //
-//	// Generate a report
-//	//vtkIdType numberOfCells = clipper->GetOutput()->GetNumberOfCells();
-//	//std::cout << "------------------------" << std::endl;
-//	//std::cout << "The inside dataset contains a " << std::endl
-//	//	<< clipper->GetOutput()->GetClassName()
-//	//	<< " that has " << numberOfCells << " cells" << std::endl;
-//	//typedef std::map<int, int> CellContainer;
-//	//CellContainer cellMap;
-//	//for (vtkIdType i = 0; i < numberOfCells; i++)
-//	//{
-//	//	cellMap[clipper->GetOutput()->GetCellType(i)]++;
-//	//}
-//
-//	//for (auto c : cellMap)
-//	//{
-//	//	std::cout << "\tCell type "
-//	//		<< vtkCellTypes::GetClassNameFromTypeId(c.first)
-//	//		<< " occurs " << c.second << " times." << std::endl;
-//	//}
-//
-//	//numberOfCells = clipper->GetClippedOutput()->GetNumberOfCells();
-//	//std::cout << "------------------------" << std::endl;
-//	//std::cout << "The clipped dataset contains a " << std::endl
-//	//	<< clipper->GetClippedOutput()->GetClassName()
-//	//	<< " that has " << numberOfCells << " cells" << std::endl;
-//	//typedef std::map<int, int> OutsideCellContainer;
-//	//CellContainer outsideCellMap;
-//	//for (vtkIdType i = 0; i < numberOfCells; i++)
-//	//{
-//	//	outsideCellMap[clipper->GetClippedOutput()->GetCellType(i)]++;
-//	//}
-//
-//	//for (auto c : outsideCellMap)
-//	//{
-//	//	std::cout << "\tCell type "
-//	//		<< vtkCellTypes::GetClassNameFromTypeId(c.first)
-//	//		<< " occurs " << c.second << " times." << std::endl;
-//	//}
+//	
 //	return EXIT_SUCCESS;
 //}
 
@@ -4455,6 +4420,7 @@ int main(int, char* [])
 //	return EXIT_SUCCESS;
 //}
 
+
 #include <vtkSmartPointer.h>
 
 #include <vtkXMLPolyDataReader.h>
@@ -4474,6 +4440,11 @@ int main(int, char* [])
 #include <vtkRenderWindowInteractor.h>
 #include<vtkUnstructuredGrid.h>
 #include<vtkUnstructuredGridReader.h>
+#include<vtkDataSetSurfaceFilter.h>
+#include<vtkDataSetMapper.h>
+#include<vtkNew.h>
+#include<vtkLookupTable.h>
+
 #include<vtkClipDataSet.h>
 
 // Callback for the interaction
@@ -4502,47 +4473,41 @@ public:
 
 int main(int argc, char* argv[])
 {
-	vtkSmartPointer<vtkSphereSource> sphereSource =
-		vtkSmartPointer<vtkSphereSource>::New();
-	sphereSource->SetRadius(10.0);
 
 	vtkSmartPointer<vtkUnstructuredGridReader> reader =
 		vtkSmartPointer<vtkUnstructuredGridReader>::New();
-
+	reader->SetFileName("Test06.vtk");
+	reader->Update();
 
 	// Setup a visualization pipeline
 	vtkSmartPointer<vtkPlane> plane =
 		vtkSmartPointer<vtkPlane>::New();
-	vtkSmartPointer<vtkClipPolyData> clipper =
-		vtkSmartPointer<vtkClipPolyData>::New();
+	plane->SetOrigin(reader->GetOutput()->GetCenter());
+	
 
-	//auto clipper = vtkSmartPointer<vtkClipDataSet>::New();
+	auto clipper = vtkSmartPointer<vtkClipDataSet>::New();
+
 	clipper->SetClipFunction(plane);
 	clipper->InsideOutOn();
+	clipper->SetInputData(reader->GetOutput());
+	//clipper->SetValue(0.0);
+	clipper->GenerateClippedOutputOn();
+	clipper->Update();
 
-	reader->SetFileName("third02.vtk");
-	reader->Update();
-	//clipper->SetInputData(reader->GetOutput());
-	clipper->SetInputConnection(reader->GetOutputPort());
-	//clipper->SetInputConnection(sphereSource->GetOutputPort());
-		
-
-
-	//clipper->SetInputConnection(reader->GetOutputPort());
-
+	vtkNew<vtkLookupTable> lut1;
+	lut1->SetHueRange(0.4, 0.9);
 	// Create a mapper and actor
-	vtkSmartPointer<vtkPolyDataMapper> mapper =
-		vtkSmartPointer<vtkPolyDataMapper>::New();
+	//vtkSmartPointer<vtkPolyDataMapper> mapper =
+	//	vtkSmartPointer<vtkPolyDataMapper>::New();
+	vtkSmartPointer<vtkDataSetMapper>mapper =
+		vtkSmartPointer<vtkDataSetMapper>::New();
 	mapper->SetInputConnection(clipper->GetOutputPort());
+	mapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
+	mapper->SetLookupTable(lut1);
+	mapper->SetColorModeToMapScalars();
 	vtkSmartPointer<vtkActor> actor =
 		vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
-
-	vtkSmartPointer<vtkProperty> backFaces =
-		vtkSmartPointer<vtkProperty>::New();
-	backFaces->SetDiffuseColor(.8, .8, .4);
-
-	actor->SetBackfaceProperty(backFaces);
 
 	// A renderer and render window
 	vtkSmartPointer<vtkRenderer> renderer =
@@ -4570,6 +4535,8 @@ int main(int argc, char* argv[])
 	rep->SetPlaceFactor(1.25); // This must be set prior to placing the widget
 	rep->PlaceWidget(actor->GetBounds());
 	rep->SetNormal(plane->GetNormal());
+	rep->SetOrigin(plane->GetOrigin());
+	rep->OutlineTranslationOff();//锁定最外层边框
 
 	vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget =
 		vtkSmartPointer<vtkImplicitPlaneWidget2>::New();

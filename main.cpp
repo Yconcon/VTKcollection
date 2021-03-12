@@ -2897,7 +2897,7 @@ int main(int argc, char* argv[])
 //	renderer->UseHiddenLineRemovalOn();
 //
 //	vtkNew<vtkUnstructuredGridReader> reader;
-//	reader->SetFileName("third02.vtk");
+//	reader->SetFileName("Test06.vtk");
 //	reader->Update();
 //
 //	//std::cout << "Loading: " << argv[1] << std::endl;
@@ -2936,6 +2936,7 @@ int main(int argc, char* argv[])
 //
 //	vtkNew<vtkActor> actor;
 //	actor->SetMapper(mapper);
+//	actor->GetProperty()->EdgeVisibilityOn();//显示网格
 //	//actor->SetBackfaceProperty(backProp);
 //	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
 //	//actor->GetProperty()->SetSpecular(.3);
@@ -4248,141 +4249,143 @@ int main(int, char* [])
 
 //剖切
 
-//#include <vtkSmartPointer.h>
-//#include <vtkClipDataSet.h>
-//#include <vtkUnstructuredGridReader.h>
-//#include <vtkUnstructuredGrid.h>
-//#include <vtkPlane.h>
-//#include <vtkTransform.h>
-//#include <vtkActor.h>
-//#include <vtkCamera.h>
-//#include <vtkCellTypes.h>
-//#include <vtkDataSetMapper.h>
-//#include <vtkLookupTable.h>
-//#include <vtkProperty.h>
-//#include <vtkRenderWindow.h>
-//#include <vtkRenderWindowInteractor.h>
-//#include <vtkRenderer.h>
-//#include <vtkNamedColors.h>
-//
-//int main(int argc, char* argv[])
-//{
-//
-//	// Create the reader for the data.
-//
-//
-//	auto reader =
-//		vtkSmartPointer<vtkUnstructuredGridReader>::New();
-//	reader->SetFileName("third02.vtk");
-//	reader->Update();
-//
-//	double bounds[6];
-//	reader->GetOutput()->GetBounds(bounds);
-//	double center[3];
-//	reader->GetOutput()->GetCenter(center);
-//
-//	auto colors =
-//		vtkSmartPointer<vtkNamedColors>::New();
-//	auto renderer = vtkSmartPointer<vtkRenderer>::New();
-//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
-//	renderer->UseHiddenLineRemovalOn();
-//
-//	auto renderWindow =
-//		vtkSmartPointer<vtkRenderWindow>::New();
-//	renderWindow->AddRenderer(renderer);
-//	renderWindow->SetSize(640, 480);
-//
-//	auto interactor =
-//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
-//	interactor->SetRenderWindow(renderWindow);
-//
-//	double xnorm[3] = { 1.0, 0, 0 };//切割面法线方向
-//
-//	//创建切割平面，设置中点和法线方向
-//	auto clipPlane = vtkSmartPointer<vtkPlane>::New();
-//	clipPlane->SetOrigin(reader->GetOutput()->GetCenter());
-//	//clipPlane->SetOrigin(0.5,0.5,1);
-//	clipPlane->SetNormal(xnorm);
-//
-//	//创建切割面数据
-//	auto clipper =
-//		vtkSmartPointer<vtkClipDataSet>::New();
-//	clipper->SetClipFunction(clipPlane);
-//	clipper->SetInputData(reader->GetOutput());
-//	clipper->SetValue(0.0);
-//	clipper->GenerateClippedOutputOn();
-//	clipper->Update();
-//
-//	//创建切割面映射
-//	auto insideMapper =
-//		vtkSmartPointer<vtkDataSetMapper>::New();
-//	insideMapper->SetInputData(clipper->GetOutput());
-//	//insideMapper->ScalarVisibilityOff();
-//	
-//
-//	vtkNew<vtkLookupTable> lut1;
-//	lut1->SetHueRange(0.5, 0.833);
-//	// Visualize
-//
-//	//mapper->ScalarVisibilityOff();
-//	insideMapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
-//	insideMapper->SetLookupTable(lut1);
-//	insideMapper->SetColorModeToMapScalars();
-//
-//	auto insideActor =
-//		vtkSmartPointer<vtkActor>::New();
-//	insideActor->SetMapper(insideMapper);
-//	//insideActor->GetProperty()->SetDiffuseColor(colors->GetColor3d("banana").GetData());
-//	insideActor->GetProperty()->SetAmbient(.3);
-//	//设置是否显示网格
-//	//insideActor->GetProperty()->EdgeVisibilityOn();
-//
-//
-//
-//
-//
-//	/*auto clippedMapper =
-//		vtkSmartPointer<vtkDataSetMapper>::New();
-//	clippedMapper->SetInputData(clipper->GetClippedOutput());
-//	clippedMapper->ScalarVisibilityOff();
-//
-//	auto clippedActor =
-//		vtkSmartPointer<vtkActor>::New();
-//	clippedActor->SetMapper(clippedMapper);
-//	clippedActor->GetProperty()->SetDiffuseColor(colors->GetColor3d("tomato").GetData());
-//	insideActor->GetProperty()->SetAmbient(.3);
-//	clippedActor->GetProperty()->EdgeVisibilityOn();*/
-//
-//	// Create transforms to make a better visualization
-//	auto insideTransform = vtkSmartPointer<vtkTransform>::New();
-//	insideTransform->Translate(-(bounds[1] - bounds[0]) * .75, 0, 0);
-//	insideTransform->Translate(center[0], center[1], center[2]);
-//	insideTransform->RotateY(-120.0);
-//	insideTransform->Translate(-center[0], -center[1], -center[2]);
-//	insideActor->SetUserTransform(insideTransform);
-//
-//	//auto clippedTransform = vtkSmartPointer<vtkTransform>::New();
-//	//clippedTransform->Translate((bounds[1] - bounds[0]) * .75, 0, 0);
-//	//clippedTransform->Translate(center[0], center[1], center[2]);
-//	//clippedTransform->RotateY(60.0);
-//	//clippedTransform->Translate(-center[0], -center[1], -center[2]);
-//	//clippedActor->SetUserTransform(clippedTransform);
-//
-//	//renderer->AddViewProp(clippedActor);
-//	renderer->AddViewProp(insideActor);
-//
-//	renderer->ResetCamera();
-//	renderer->GetActiveCamera()->Dolly(1.4);
-//	renderer->ResetCameraClippingRange();
-//	renderWindow->Render();
-//	renderWindow->SetWindowName("ClipUnstructuredGridWithPlane2");
-//	renderWindow->Render();
-//
-//	interactor->Start();
-//
-//	
-//	return EXIT_SUCCESS;
-//}
+#include <vtkSmartPointer.h>
+#include <vtkClipDataSet.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkPlane.h>
+#include <vtkTransform.h>
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkCellTypes.h>
+#include <vtkDataSetMapper.h>
+#include <vtkLookupTable.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkXMLUnstructuredGridReader.h>
+#include <vtkRenderer.h>
+#include <vtkNamedColors.h>
+
+int main(int argc, char* argv[])
+{
+
+	// Create the reader for the data.
+
+
+	//auto reader =
+	//	vtkSmartPointer<vtkUnstructuredGridReader>::New();
+	auto reader = vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+	reader->SetFileName("vtuTest.vtu");
+	reader->Update();
+
+	double bounds[6];
+	reader->GetOutput()->GetBounds(bounds);
+	double center[3];
+	reader->GetOutput()->GetCenter(center);
+
+	auto colors =
+		vtkSmartPointer<vtkNamedColors>::New();
+	auto renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+	renderer->UseHiddenLineRemovalOn();
+
+	auto renderWindow =
+		vtkSmartPointer<vtkRenderWindow>::New();
+	renderWindow->AddRenderer(renderer);
+	renderWindow->SetSize(640, 480);
+
+	auto interactor =
+		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	interactor->SetRenderWindow(renderWindow);
+
+	double xnorm[3] = { 1.0, 0, 0 };//切割面法线方向
+
+	//创建切割平面，设置中点和法线方向
+	auto clipPlane = vtkSmartPointer<vtkPlane>::New();
+	clipPlane->SetOrigin(reader->GetOutput()->GetCenter());
+	//clipPlane->SetOrigin(0.5,0.5,1);
+	clipPlane->SetNormal(xnorm);
+
+	//创建切割面数据
+	auto clipper =
+		vtkSmartPointer<vtkClipDataSet>::New();
+	clipper->SetClipFunction(clipPlane);
+	clipper->SetInputData(reader->GetOutput());
+	clipper->SetValue(0.0);
+	clipper->GenerateClippedOutputOn();
+	clipper->Update();
+
+	//创建切割面映射
+	auto insideMapper =
+		vtkSmartPointer<vtkDataSetMapper>::New();
+	insideMapper->SetInputData(clipper->GetOutput());
+	//insideMapper->ScalarVisibilityOff();
+	
+
+	vtkNew<vtkLookupTable> lut1;
+	lut1->SetHueRange(0.5, 0.833);
+	// Visualize
+
+	//mapper->ScalarVisibilityOff();
+	insideMapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
+	insideMapper->SetLookupTable(lut1);
+	insideMapper->SetColorModeToMapScalars();
+
+	auto insideActor =
+		vtkSmartPointer<vtkActor>::New();
+	insideActor->SetMapper(insideMapper);
+	//insideActor->GetProperty()->SetDiffuseColor(colors->GetColor3d("banana").GetData());
+	insideActor->GetProperty()->SetAmbient(.3);
+	//设置是否显示网格
+	insideActor->GetProperty()->EdgeVisibilityOn();
+
+
+
+
+
+	/*auto clippedMapper =
+		vtkSmartPointer<vtkDataSetMapper>::New();
+	clippedMapper->SetInputData(clipper->GetClippedOutput());
+	clippedMapper->ScalarVisibilityOff();
+
+	auto clippedActor =
+		vtkSmartPointer<vtkActor>::New();
+	clippedActor->SetMapper(clippedMapper);
+	clippedActor->GetProperty()->SetDiffuseColor(colors->GetColor3d("tomato").GetData());
+	insideActor->GetProperty()->SetAmbient(.3);
+	clippedActor->GetProperty()->EdgeVisibilityOn();*/
+
+	// Create transforms to make a better visualization
+	auto insideTransform = vtkSmartPointer<vtkTransform>::New();
+	insideTransform->Translate(-(bounds[1] - bounds[0]) * .75, 0, 0);
+	insideTransform->Translate(center[0], center[1], center[2]);
+	insideTransform->RotateY(-120.0);
+	insideTransform->Translate(-center[0], -center[1], -center[2]);
+	insideActor->SetUserTransform(insideTransform);
+
+	//auto clippedTransform = vtkSmartPointer<vtkTransform>::New();
+	//clippedTransform->Translate((bounds[1] - bounds[0]) * .75, 0, 0);
+	//clippedTransform->Translate(center[0], center[1], center[2]);
+	//clippedTransform->RotateY(60.0);
+	//clippedTransform->Translate(-center[0], -center[1], -center[2]);
+	//clippedActor->SetUserTransform(clippedTransform);
+
+	//renderer->AddViewProp(clippedActor);
+	renderer->AddViewProp(insideActor);
+
+	renderer->ResetCamera();
+	renderer->GetActiveCamera()->Dolly(1.4);
+	renderer->ResetCameraClippingRange();
+	renderWindow->Render();
+	renderWindow->SetWindowName("ClipUnstructuredGridWithPlane2");
+	renderWindow->Render();
+
+	interactor->Start();
+
+	
+	return EXIT_SUCCESS;
+}
 
 //vtkPlaneWidget网格面
 
@@ -4421,137 +4424,329 @@ int main(int, char* [])
 //}
 
 
-#include <vtkSmartPointer.h>
+//剖切，切块
 
-#include <vtkXMLPolyDataReader.h>
-#include <vtkSphereSource.h>
-#include <vtkClipPolyData.h>
-#include <vtkPlane.h>
+//#include <vtkSmartPointer.h>
+//
+//#include <vtkXMLPolyDataReader.h>
+//#include <vtkSphereSource.h>
+//#include <vtkClipPolyData.h>
+//#include <vtkPlane.h>
+//
+//#include <vtkCommand.h>
+//#include <vtkImplicitPlaneWidget2.h>
+//#include <vtkImplicitPlaneRepresentation.h>
+//#include<vtkPolyDataMapper.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkActor.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include<vtkUnstructuredGrid.h>
+//#include<vtkUnstructuredGridReader.h>
+//#include<vtkXMLUnstructuredGridReader.h>
+//#include<vtkDataSetSurfaceFilter.h>
+//#include<vtkDataSetMapper.h>
+//#include<vtkNew.h>
+//#include<vtkLookupTable.h>
+//
+//#include<vtkClipDataSet.h>
+//
+//// Callback for the interaction
+//// This does the actual work: updates the vtkPlane implicit function.
+//// This in turn causes the pipeline to update and clip the object.
+//class vtkIPWCallback : public vtkCommand
+//{
+//public:
+//	static vtkIPWCallback* New()
+//	{
+//		return new vtkIPWCallback;
+//	}
+//	virtual void Execute(vtkObject* caller, unsigned long, void*)
+//	{
+//		vtkImplicitPlaneWidget2* planeWidget =
+//			reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
+//		vtkImplicitPlaneRepresentation* rep =
+//			reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
+//		rep->GetPlane(this->Plane);
+//	}
+//	vtkIPWCallback() :Plane(0), Actor(0) {}
+//	vtkPlane* Plane;
+//	vtkActor* Actor;
+//
+//};
+//
+//int main(int argc, char* argv[])
+//{
+//
+//	//vtkSmartPointer<vtkUnstructuredGridReader> reader =
+//	//	vtkSmartPointer<vtkUnstructuredGridReader>::New();
+//	vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
+//		vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+//	reader->SetFileName("vtuTest.vtu");
+//	reader->Update();
+//	
+//
+//	// Setup a visualization pipeline
+//	vtkSmartPointer<vtkPlane> plane =
+//		vtkSmartPointer<vtkPlane>::New();
+//	plane->SetOrigin(reader->GetOutput()->GetCenter());
+//	
+//
+//	auto clipper = vtkSmartPointer<vtkClipDataSet>::New();
+//
+//	clipper->SetClipFunction(plane);
+//	clipper->InsideOutOn();
+//	clipper->SetInputData(reader->GetOutput());
+//	//clipper->SetValue(0.0);
+//	clipper->GenerateClippedOutputOn();
+//	clipper->Update();
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.4, 0.9);
+//	// Create a mapper and actor
+//	//vtkSmartPointer<vtkPolyDataMapper> mapper =
+//	//	vtkSmartPointer<vtkPolyDataMapper>::New();
+//	vtkSmartPointer<vtkDataSetMapper>mapper =
+//		vtkSmartPointer<vtkDataSetMapper>::New();
+//	mapper->SetInputConnection(clipper->GetOutputPort());
+//	mapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//	vtkSmartPointer<vtkActor> actor =
+//		vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(mapper);
+//
+//	// A renderer and render window
+//	vtkSmartPointer<vtkRenderer> renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	vtkSmartPointer<vtkRenderWindow> renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->AddRenderer(renderer);
+//	renderer->AddActor(actor);
+//
+//	// An interactor
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	renderWindow->Render();
+//
+//	// The callback will do the work
+//	vtkSmartPointer<vtkIPWCallback> myCallback =
+//		vtkSmartPointer<vtkIPWCallback>::New();
+//	myCallback->Plane = plane;
+//	myCallback->Actor = actor;
+//
+//	vtkSmartPointer<vtkImplicitPlaneRepresentation> rep =
+//		vtkSmartPointer<vtkImplicitPlaneRepresentation>::New();
+//	rep->SetPlaceFactor(1.25); // This must be set prior to placing the widget
+//	rep->PlaceWidget(actor->GetBounds());
+//	rep->SetNormal(plane->GetNormal());
+//	rep->SetOrigin(plane->GetOrigin());
+//	rep->OutlineTranslationOff();//锁定最外层边框
+//
+//	vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget =
+//		vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
+//	planeWidget->SetInteractor(renderWindowInteractor);
+//	planeWidget->SetRepresentation(rep);
+//	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
+//
+//	// Render
+//
+//	renderWindowInteractor->Initialize();
+//	renderWindow->Render();
+//	planeWidget->On();
+//
+//	// Begin mouse interaction
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
-#include <vtkCommand.h>
-#include <vtkImplicitPlaneWidget2.h>
-#include <vtkImplicitPlaneRepresentation.h>
-#include<vtkPolyDataMapper.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
-#include <vtkActor.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor.h>
-#include<vtkUnstructuredGrid.h>
-#include<vtkUnstructuredGridReader.h>
-#include<vtkDataSetSurfaceFilter.h>
-#include<vtkDataSetMapper.h>
-#include<vtkNew.h>
-#include<vtkLookupTable.h>
 
-#include<vtkClipDataSet.h>
+//#include <vtkSmartPointer.h>
+//
+//#include <vtkXMLPolyDataReader.h>
+//#include <vtkSphereSource.h>
+//#include <vtkClipPolyData.h>
+//#include <vtkPlane.h>
+//
+//#include <vtkCommand.h>
+//#include <vtkImplicitPlaneWidget2.h>
+//#include <vtkImplicitPlaneRepresentation.h>
+//#include<vtkPolyDataMapper.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkActor.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include<vtkUnstructuredGrid.h>
+//#include<vtkUnstructuredGridReader.h>
+//#include<vtkDataSetSurfaceFilter.h>
+//#include<vtkDataSetMapper.h>
+//#include<vtkNew.h>
+//#include<vtkLookupTable.h>
+//
+//#include<vtkClipDataSet.h>
+//#include<vtkCutter.h>
+//
+//int main(int argc, char* argv[])
+//{
+//
+//	vtkSmartPointer<vtkUnstructuredGridReader> reader =
+//		vtkSmartPointer<vtkUnstructuredGridReader>::New();
+//	reader->SetFileName("third02.vtk");
+//	reader->Update();
+//
+//	// Setup a visualization pipeline
+//	vtkSmartPointer<vtkPlane> plane =
+//		vtkSmartPointer<vtkPlane>::New();
+//	plane->SetOrigin(reader->GetOutput()->GetCenter());
+//	plane->SetNormal(1, 0, 0);
+//
+//	auto cutter = vtkSmartPointer<vtkCutter>::New();
+//
+//	cutter->SetInputConnection(reader->GetOutputPort());
+//	cutter->SetCutFunction(plane);
+//	
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.4, 0.9);
+//	// Create a mapper and actor
+//	//vtkSmartPointer<vtkPolyDataMapper> mapper =
+//	//	vtkSmartPointer<vtkPolyDataMapper>::New();
+//	vtkSmartPointer<vtkDataSetMapper>mapper =
+//		vtkSmartPointer<vtkDataSetMapper>::New();
+//	mapper->SetInputConnection(cutter->GetOutputPort());
+//	mapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//	vtkSmartPointer<vtkActor> actor =
+//		vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(mapper);
+//
+//	// A renderer and render window
+//	vtkSmartPointer<vtkRenderer> renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	vtkSmartPointer<vtkRenderWindow> renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->AddRenderer(renderer);
+//	renderer->AddActor(actor);
+//
+//	// An interactor
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	renderWindow->Render();
+//
+//
+//	// Render
+//
+//	renderWindowInteractor->Initialize();
+//	renderWindow->Render();
+//
+//	// Begin mouse interaction
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
-// Callback for the interaction
-// This does the actual work: updates the vtkPlane implicit function.
-// This in turn causes the pipeline to update and clip the object.
-class vtkIPWCallback : public vtkCommand
-{
-public:
-	static vtkIPWCallback* New()
-	{
-		return new vtkIPWCallback;
-	}
-	virtual void Execute(vtkObject* caller, unsigned long, void*)
-	{
-		vtkImplicitPlaneWidget2* planeWidget =
-			reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
-		vtkImplicitPlaneRepresentation* rep =
-			reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
-		rep->GetPlane(this->Plane);
-	}
-	vtkIPWCallback() :Plane(0), Actor(0) {}
-	vtkPlane* Plane;
-	vtkActor* Actor;
+//面单元的立方体
 
-};
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkCellArray.h>
+//#include <vtkFloatArray.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPointData.h>
+//#include <vtkPoints.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//
+//#include <array>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	std::array<std::array<double, 3>, 8> pts = { {{{0, 0, 0}},
+//												 {{1, 0, 0}},
+//												 {{1, 1, 0}},
+//												 {{0, 1, 0}},
+//												 {{0, 0, 1}},
+//												 {{1, 0, 1}},
+//												 {{1, 1, 1}},
+//												 {{0, 1, 1}}} };
+//	// The ordering of the corner points on each face.
+//	std::array<std::array<vtkIdType, 4>, 6> ordering = { {{{0, 1, 2, 3}},
+//														 {{4, 5, 6, 7}},
+//														 {{0, 1, 5, 4}},
+//														 {{1, 2, 6, 5}},
+//														 {{2, 3, 7, 6}},
+//														 {{3, 0, 4, 7}}} };
+//
+//	// We'll create the building blocks of polydata including data attributes.
+//	vtkNew<vtkPolyData> cube;
+//	vtkNew<vtkPoints> points;
+//	vtkNew<vtkCellArray> polys;
+//	vtkNew<vtkFloatArray> scalars;
+//
+//	// Load the point, cell, and data attributes.
+//	for (auto i = 0ul; i < pts.size(); ++i)
+//	{
+//		points->InsertPoint(i, pts[i].data());
+//		scalars->InsertTuple1(i, i);
+//	}
+//	for (auto&& i : ordering)
+//	{
+//		polys->InsertNextCell(vtkIdType(i.size()), i.data());
+//	}
+//
+//	// We now assign the pieces to the vtkPolyData.
+//	cube->SetPoints(points);
+//	cube->SetPolys(polys);
+//	cube->GetPointData()->SetScalars(scalars);
+//
+//	// Now we'll look at it.
+//	vtkNew<vtkPolyDataMapper> cubeMapper;
+//	cubeMapper->SetInputData(cube);
+//	cubeMapper->SetScalarRange(cube->GetScalarRange());
+//	vtkNew<vtkActor> cubeActor;
+//	cubeActor->SetMapper(cubeMapper);
+//
+//	// The usual rendering stuff.
+//	vtkNew<vtkCamera> camera;
+//	camera->SetPosition(1, 1, 1);
+//	camera->SetFocalPoint(0, 0, 0);
+//
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renWin;
+//	renWin->AddRenderer(renderer);
+//	renWin->SetWindowName("Cube");
+//
+//	vtkNew<vtkRenderWindowInteractor> iren;
+//	iren->SetRenderWindow(renWin);
+//
+//	renderer->AddActor(cubeActor);
+//	renderer->SetActiveCamera(camera);
+//	renderer->ResetCamera();
+//	renderer->SetBackground(colors->GetColor3d("Cornsilk").GetData());
+//
+//	renWin->SetSize(600, 600);
+//
+//	// interact with data
+//	renWin->Render();
+//	iren->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
-int main(int argc, char* argv[])
-{
 
-	vtkSmartPointer<vtkUnstructuredGridReader> reader =
-		vtkSmartPointer<vtkUnstructuredGridReader>::New();
-	reader->SetFileName("Test06.vtk");
-	reader->Update();
-
-	// Setup a visualization pipeline
-	vtkSmartPointer<vtkPlane> plane =
-		vtkSmartPointer<vtkPlane>::New();
-	plane->SetOrigin(reader->GetOutput()->GetCenter());
-	
-
-	auto clipper = vtkSmartPointer<vtkClipDataSet>::New();
-
-	clipper->SetClipFunction(plane);
-	clipper->InsideOutOn();
-	clipper->SetInputData(reader->GetOutput());
-	//clipper->SetValue(0.0);
-	clipper->GenerateClippedOutputOn();
-	clipper->Update();
-
-	vtkNew<vtkLookupTable> lut1;
-	lut1->SetHueRange(0.4, 0.9);
-	// Create a mapper and actor
-	//vtkSmartPointer<vtkPolyDataMapper> mapper =
-	//	vtkSmartPointer<vtkPolyDataMapper>::New();
-	vtkSmartPointer<vtkDataSetMapper>mapper =
-		vtkSmartPointer<vtkDataSetMapper>::New();
-	mapper->SetInputConnection(clipper->GetOutputPort());
-	mapper->SetScalarRange(reader->GetOutput()->GetScalarRange());
-	mapper->SetLookupTable(lut1);
-	mapper->SetColorModeToMapScalars();
-	vtkSmartPointer<vtkActor> actor =
-		vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(mapper);
-
-	// A renderer and render window
-	vtkSmartPointer<vtkRenderer> renderer =
-		vtkSmartPointer<vtkRenderer>::New();
-	vtkSmartPointer<vtkRenderWindow> renderWindow =
-		vtkSmartPointer<vtkRenderWindow>::New();
-	renderWindow->AddRenderer(renderer);
-	renderer->AddActor(actor);
-
-	// An interactor
-	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-		vtkSmartPointer<vtkRenderWindowInteractor>::New();
-	renderWindowInteractor->SetRenderWindow(renderWindow);
-
-	renderWindow->Render();
-
-	// The callback will do the work
-	vtkSmartPointer<vtkIPWCallback> myCallback =
-		vtkSmartPointer<vtkIPWCallback>::New();
-	myCallback->Plane = plane;
-	myCallback->Actor = actor;
-
-	vtkSmartPointer<vtkImplicitPlaneRepresentation> rep =
-		vtkSmartPointer<vtkImplicitPlaneRepresentation>::New();
-	rep->SetPlaceFactor(1.25); // This must be set prior to placing the widget
-	rep->PlaceWidget(actor->GetBounds());
-	rep->SetNormal(plane->GetNormal());
-	rep->SetOrigin(plane->GetOrigin());
-	rep->OutlineTranslationOff();//锁定最外层边框
-
-	vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget =
-		vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
-	planeWidget->SetInteractor(renderWindowInteractor);
-	planeWidget->SetRepresentation(rep);
-	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
-
-	// Render
-
-	renderWindowInteractor->Initialize();
-	renderWindow->Render();
-	planeWidget->On();
-
-	// Begin mouse interaction
-	renderWindowInteractor->Start();
-
-	return EXIT_SUCCESS;
-}

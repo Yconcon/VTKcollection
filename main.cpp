@@ -1448,7 +1448,7 @@ int main(int argc, char* argv[]) {
 //	renderer->UseHiddenLineRemovalOn();
 //
 //	vtkNew<vtkUnstructuredGridReader> reader;
-//	reader->SetFileName("Test1.vtk");
+//	reader->SetFileName("mesh-paraview.vtk");
 //	reader->Update();
 //
 //	//std::cout << "Loading: " << argv[1] << std::endl;
@@ -2848,110 +2848,138 @@ int main(int argc, char* argv[])
 
 
 
-//读.vtk文件，染色，显示色卡
+//读.vtk文件，染色，显示色卡，选择显示标量
 
-//#include <vtkAppendFilter.h>
-//#include <vtkSphereSource.h>
-//#include <vtkUnstructuredGrid.h>
-//#include <vtkUnstructuredGridReader.h>
-//#include <vtkXMLUnstructuredGridReader.h>
-//
-//#include <vtkActor.h>
-//#include <vtkCamera.h>
-//#include <vtkDataSetMapper.h>
-//#include <vtkNamedColors.h>
-//#include <vtkNew.h>
-//#include <vtkProperty.h>
-//#include <vtkRenderWindow.h>
-//#include <vtkRenderWindowInteractor.h>
-//#include <vtkRenderer.h>
-//#include <vtkSmartPointer.h>
-//#include <vtkLookupTable.h>
-//#include <algorithm>
-//#include <array>
-//#include <string>
-//#include <vtkScalarBarActor.h>
-//#include <vtkAxesActor.h>
-//#include <vtkOrientationMarkerWidget.h>
-//
-//namespace {
-//	vtkSmartPointer<vtkUnstructuredGrid>
-//		ReadUnstructuredGrid(std::string const& fileName);
-//}
-//
-//int main(int argc, char* argv[])
-//{
-//	// Vis Pipeline
-//	vtkNew<vtkNamedColors> colors;
-//
-//	vtkNew<vtkRenderer> renderer;
-//
-//	vtkNew<vtkRenderWindow> renderWindow;
-//	renderWindow->SetSize(640, 480);
-//	renderWindow->AddRenderer(renderer);
-//
-//	vtkNew<vtkRenderWindowInteractor> interactor;
-//	interactor->SetRenderWindow(renderWindow);
-//
-//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
-//	renderer->UseHiddenLineRemovalOn();
-//
-//	vtkNew<vtkUnstructuredGridReader> reader;
-//	reader->SetFileName("Test06.vtk");
-//	reader->Update();
-//
-//	//std::cout << "Loading: " << argv[1] << std::endl;
-//	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
-//	auto unstructuredGrid = reader->GetOutput();
-//	
-//
-//	vtkNew<vtkLookupTable> lut1;
-//	lut1->SetHueRange(0.5, 0.833);
-//	// Visualize
-//	vtkNew<vtkDataSetMapper> mapper;
-//	mapper->SetInputData(unstructuredGrid);
-//	//mapper->ScalarVisibilityOff();
-//	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
-//	mapper->SetLookupTable(lut1);
-//	mapper->SetColorModeToMapScalars();
-//
-//	vtkNew<vtkScalarBarActor> scalarbar;
-//	scalarbar->SetLookupTable(mapper->GetLookupTable());
-//	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
-//	scalarbar->SetNumberOfLabels(5);
-//	renderer->AddActor2D(scalarbar);
-//
-//
-//	vtkNew<vtkAxesActor> axes;
-//
-//	vtkNew<vtkOrientationMarkerWidget> widget;
-//	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
-//	colors->GetColor("Carrot", rgba);
-//	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
-//	widget->SetOrientationMarker(axes);
-//	widget->SetInteractor(interactor);
-//	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
-//	widget->SetEnabled(1);
-//	widget->InteractiveOn();
-//
-//	vtkNew<vtkActor> actor;
-//	actor->SetMapper(mapper);
-//	actor->GetProperty()->EdgeVisibilityOn();//显示网格
-//	//actor->SetBackfaceProperty(backProp);
-//	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
-//	//actor->GetProperty()->SetSpecular(.3);
-//	//actor->GetProperty()->SetSpecularPower(30);
-//	//actor->GetProperty()->EdgeVisibilityOn();
-//	renderer->AddActor(actor);
-//	renderer->GetActiveCamera()->Azimuth(45);
-//	renderer->GetActiveCamera()->Elevation(45);
-//	renderer->ResetCamera();
-//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
-//	renderWindow->Render();
-//	interactor->Start();
-//
-//	return EXIT_SUCCESS;
-//}
+#include <vtkAppendFilter.h>
+#include <vtkSphereSource.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkXMLUnstructuredGridReader.h>
+
+
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkDataSetMapper.h>
+#include <vtkNamedColors.h>
+#include <vtkNew.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkLookupTable.h>
+#include <algorithm>
+#include <array>
+#include <string>
+#include <vtkScalarBarActor.h>
+#include <vtkAxesActor.h>
+#include <vtkOrientationMarkerWidget.h>
+#include <vtkDataSetAttributes.h>
+#include <vtkPolyData.h>
+#include <vtkPointData.h>
+
+namespace {
+	vtkSmartPointer<vtkUnstructuredGrid>
+		ReadUnstructuredGrid(std::string const& fileName);
+}
+
+int main(int argc, char* argv[])
+{
+	// Vis Pipeline
+	vtkNew<vtkNamedColors> colors;
+
+	vtkNew<vtkRenderer> renderer;
+
+	vtkNew<vtkRenderWindow> renderWindow;
+	renderWindow->SetSize(640, 480);
+	renderWindow->AddRenderer(renderer);
+
+	vtkNew<vtkRenderWindowInteractor> interactor;
+	interactor->SetRenderWindow(renderWindow);
+
+	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+	renderer->UseHiddenLineRemovalOn();
+
+	vtkNew<vtkUnstructuredGridReader> reader;
+	reader->ReadAllScalarsOn();//获取所有的标量数据
+	reader->ReadAllVectorsOn();
+	reader->ReadAllNormalsOn();
+	reader->ReadAllTensorsOn();
+	reader->ReadAllColorScalarsOn();
+	reader->ReadAllTCoordsOn();
+	reader->ReadAllFieldsOn();
+
+	reader->SetFileName("Test02.vtk");
+	reader->GetOutput()->Register(reader);
+	reader->Update();
+
+	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
+	cout << nNumScalar << endl;
+
+
+	//std::cout << "Loading: " << argv[1] << std::endl;
+	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
+	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
+		vtkSmartPointer<vtkPolyData>::New();
+	auto unstructuredGrid = reader->GetOutput();
+	cout << reader->GetScalarsNameInFile(0) << endl;
+	cout << reader->GetScalarsNameInFile(1) << endl;
+	cout << reader->GetScalarsNameInFile(2) << endl;
+	
+	reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
+	
+
+	vtkNew<vtkLookupTable> lut1;
+	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+	// Visualize
+	vtkNew<vtkDataSetMapper> mapper;
+	mapper->SetInputData(unstructuredGrid);
+	//mapper->ScalarVisibilityOff();
+	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+	mapper->SetLookupTable(lut1);
+	mapper->SetColorModeToMapScalars();
+
+	cout << unstructuredGrid->GetScalarRange()[0] << endl;
+	cout << unstructuredGrid->GetScalarRange()[1] << endl;
+
+	vtkNew<vtkScalarBarActor> scalarbar;
+	scalarbar->SetLookupTable(mapper->GetLookupTable());
+	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+	scalarbar->SetNumberOfLabels(5);
+	renderer->AddActor2D(scalarbar);
+
+
+	vtkNew<vtkAxesActor> axes;
+
+	vtkNew<vtkOrientationMarkerWidget> widget;
+	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+	colors->GetColor("Carrot", rgba);
+	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+	widget->SetOrientationMarker(axes);
+	widget->SetInteractor(interactor);
+	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+	widget->SetEnabled(1);
+	widget->InteractiveOn();
+
+	vtkNew<vtkActor> actor;
+	actor->SetMapper(mapper);
+	actor->GetProperty()->EdgeVisibilityOn();//显示网格
+	//actor->SetBackfaceProperty(backProp);
+	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+	//actor->GetProperty()->SetSpecular(.3);
+	//actor->GetProperty()->SetSpecularPower(30);
+	//actor->GetProperty()->EdgeVisibilityOn();
+	renderer->AddActor(actor);
+	renderer->GetActiveCamera()->Azimuth(45);
+	renderer->GetActiveCamera()->Elevation(45);
+	renderer->ResetCamera();
+	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+	renderWindow->Render();
+	interactor->Start();
+
+	return EXIT_SUCCESS;
+}
+
 
 
 //显示坐标轴，但是会随着视角旋转改变坐标轴位置
@@ -5064,176 +5092,181 @@ int main(int, char* [])
 
 //选中actor，加外边框
 
-#include <vtkAutoInit.h>
-#include <vtkObject.h>
-#include <vtkSmartPointer.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-#include <vtkPolyDataSilhouette.h>
-#include <vtkMath.h>
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkPropPicker.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSphereSource.h>
-#include <vtkNamedColors.h>
-
-namespace
-{
-	// Handle mouse events
-	class MouseInteractorHighLightActor : public vtkInteractorStyleTrackballCamera
-	{
-	public:
-		static MouseInteractorHighLightActor* New();
-		vtkTypeMacro(MouseInteractorHighLightActor,
-			vtkInteractorStyleTrackballCamera);
-
-		MouseInteractorHighLightActor()
-		{
-			LastPickedActor = nullptr;
-			SilhouetteActor = nullptr;
-			Silhouette = nullptr;
-		}
-		virtual ~MouseInteractorHighLightActor()
-		{
-		}
-		virtual void OnLeftButtonDown() override
-		{
-			int* clickPos = this->GetInteractor()->GetEventPosition();
-
-			// Pick from this location.
-			auto picker =
-				vtkSmartPointer<vtkPropPicker>::New();
-			picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
-			this->LastPickedActor = picker->GetActor();
-
-			// If we picked something before, remove the silhouette actor and
-			// generate a new one
-			if (this->LastPickedActor)
-			{
-				this->GetDefaultRenderer()->RemoveActor(this->SilhouetteActor);
-
-				// Highlight the picked actor by generating a silouhette
-				this->Silhouette->SetInputData(
-					dynamic_cast<vtkPolyDataMapper*>(this->LastPickedActor->GetMapper())->GetInput());
-				this->GetDefaultRenderer()->AddActor(this->SilhouetteActor);
-			}
-
-			// Forward events
-			vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
-		}
-		void SetSilhouette(vtkPolyDataSilhouette* silhouette)
-		{
-			this->Silhouette = silhouette;
-		}
-		void SetSilhouetteActor(vtkActor* silhouetteActor)
-		{
-			this->SilhouetteActor = silhouetteActor;
-		}
-	private:
-		vtkActor* LastPickedActor;
-		vtkActor* SilhouetteActor;
-		vtkPolyDataSilhouette* Silhouette;
-	};
-}
-
-vtkStandardNewMacro(MouseInteractorHighLightActor);
-
-// Execute application.
-int main(int argc, char* argv[])
-{
-	auto colors =
-		vtkSmartPointer<vtkNamedColors>::New();
-	colors->SetColor("Bkg", 0.3, 0.4, 0.5);
-
-	int numberOfSpheres = 10;
-	if (argc > 1)
-	{
-		numberOfSpheres = atoi(argv[1]);
-	}
-	// Create a renderer and render window
-	auto renderer =
-		vtkSmartPointer<vtkRenderer>::New();
-	auto renderWindow =
-		vtkSmartPointer<vtkRenderWindow>::New();
-	renderWindow->SetSize(640, 480);
-	renderWindow->AddRenderer(renderer);
-
-	// An interactor
-	auto interactor =
-		vtkSmartPointer<vtkRenderWindowInteractor>::New();
-	interactor->SetRenderWindow(renderWindow);
-
-	for (int i = 0; i < numberOfSpheres; ++i)
-	{
-		auto source =
-			vtkSmartPointer<vtkSphereSource>::New();
-		double x, y, z, radius;
-		x = vtkMath::Random(-5, 5);
-		y = vtkMath::Random(-5, 5);
-		z = vtkMath::Random(-5, 5);
-		radius = vtkMath::Random(0.5, 1.0);
-		source->SetRadius(radius);
-		source->SetCenter(x, y, z);
-		source->SetPhiResolution(11);
-		source->SetThetaResolution(21);
-		auto mapper =
-			vtkSmartPointer<vtkPolyDataMapper>::New();
-		mapper->SetInputConnection(source->GetOutputPort());
-		auto actor =
-			vtkSmartPointer<vtkActor>::New();
-		actor->SetMapper(mapper);
-		double r, g, b;
-		r = vtkMath::Random(0.4, 1.0);
-		g = vtkMath::Random(0.4, 1.0);
-		b = vtkMath::Random(0.4, 1.0);
-		actor->GetProperty()->SetDiffuseColor(r, g, b);
-		actor->GetProperty()->SetDiffuse(0.8);
-		actor->GetProperty()->SetSpecular(0.5);
-		actor->GetProperty()->SetSpecularColor(
-			colors->GetColor3d("White").GetData());
-		actor->GetProperty()->SetSpecularPower(30.0);
-		renderer->AddActor(actor);
-	}
-
-	renderer->SetBackground(colors->GetColor3d("Bkg").GetData());
-
-	// Render and interact
-	renderWindow->Render();
-
-	// Create the silhouette pipeline, the input data will be set in the
-	// interactor
-	auto silhouette =
-		vtkSmartPointer<vtkPolyDataSilhouette>::New();
-	silhouette->SetCamera(renderer->GetActiveCamera());
-
-	// Create mapper and actor for silhouette
-	auto silhouetteMapper =
-		vtkSmartPointer<vtkPolyDataMapper>::New();
-	silhouetteMapper->SetInputConnection(silhouette->GetOutputPort());
-
-	auto silhouetteActor =
-		vtkSmartPointer<vtkActor>::New();
-	silhouetteActor->SetMapper(silhouetteMapper);
-	silhouetteActor->GetProperty()->SetColor(colors->GetColor3d("Tomato").GetData());
-	silhouetteActor->GetProperty()->SetLineWidth(5);
-
-	// Set the custom type to use for interaction.
-	auto style =
-		vtkSmartPointer<MouseInteractorHighLightActor>::New();
-	style->SetDefaultRenderer(renderer);
-	style->SetSilhouetteActor(silhouetteActor);
-	style->SetSilhouette(silhouette);
-
-	interactor->SetInteractorStyle(style);
-
-	interactor->Start();
-
-	return EXIT_SUCCESS;
-}
+//#include <vtkAutoInit.h>
+//#include <vtkObject.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkPolyDataSilhouette.h>
+//#include <vtkMath.h>
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkPropPicker.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSphereSource.h>
+//#include <vtkNamedColors.h>
+//
+//namespace
+//{
+//	// Handle mouse events
+//	class MouseInteractorHighLightActor : public vtkInteractorStyleTrackballCamera
+//	{
+//	public:
+//		static MouseInteractorHighLightActor* New();
+//		vtkTypeMacro(MouseInteractorHighLightActor,
+//			vtkInteractorStyleTrackballCamera);
+//
+//		MouseInteractorHighLightActor()
+//		{
+//			LastPickedActor = nullptr;
+//			SilhouetteActor = nullptr;
+//			Silhouette = nullptr;
+//		}
+//		virtual ~MouseInteractorHighLightActor()
+//		{
+//		}
+//		virtual void OnLeftButtonDown() override
+//		{
+//			int* clickPos = this->GetInteractor()->GetEventPosition();
+//
+//			// Pick from this location.
+//			auto picker =
+//				vtkSmartPointer<vtkPropPicker>::New();
+//			picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+//			//this->LastPickedActor = picker->GetActor();
+//
+//			// If we picked something before, remove the silhouette actor and
+//			// generate a new one
+//			if (this->LastPickedActor)
+//			{
+//				this->GetDefaultRenderer()->RemoveActor(this->SilhouetteActor);
+//			}
+//			this->LastPickedActor = picker->GetActor();
+//			if (this->LastPickedActor)
+//			{
+//				this->GetDefaultRenderer()->RemoveActor(this->SilhouetteActor);
+//				
+//				// Highlight the picked actor by generating a silouhette
+//				this->Silhouette->SetInputData(
+//					dynamic_cast<vtkPolyDataMapper*>(this->LastPickedActor->GetMapper())->GetInput());
+//				this->GetDefaultRenderer()->AddActor(this->SilhouetteActor);
+//			}
+//
+//			// Forward events
+//			vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+//		}
+//		void SetSilhouette(vtkPolyDataSilhouette* silhouette)
+//		{
+//			this->Silhouette = silhouette;
+//		}
+//		void SetSilhouetteActor(vtkActor* silhouetteActor)
+//		{
+//			this->SilhouetteActor = silhouetteActor;
+//		}
+//	private:
+//		vtkActor* LastPickedActor;
+//		vtkActor* SilhouetteActor;
+//		vtkPolyDataSilhouette* Silhouette;
+//	};
+//}
+//
+//vtkStandardNewMacro(MouseInteractorHighLightActor);
+//
+//// Execute application.
+//int main(int argc, char* argv[])
+//{
+//	auto colors =
+//		vtkSmartPointer<vtkNamedColors>::New();
+//	colors->SetColor("Bkg", 0.3, 0.4, 0.5);
+//
+//	int numberOfSpheres = 10;
+//	if (argc > 1)
+//	{
+//		numberOfSpheres = atoi(argv[1]);
+//	}
+//	// Create a renderer and render window
+//	auto renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	auto renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	// An interactor
+//	auto interactor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	for (int i = 0; i < numberOfSpheres; ++i)
+//	{
+//		auto source =
+//			vtkSmartPointer<vtkSphereSource>::New();
+//		double x, y, z, radius;
+//		x = vtkMath::Random(-5, 5);
+//		y = vtkMath::Random(-5, 5);
+//		z = vtkMath::Random(-5, 5);
+//		radius = vtkMath::Random(0.5, 1.0);
+//		source->SetRadius(radius);
+//		source->SetCenter(x, y, z);
+//		source->SetPhiResolution(11);
+//		source->SetThetaResolution(21);
+//		auto mapper =
+//			vtkSmartPointer<vtkPolyDataMapper>::New();
+//		mapper->SetInputConnection(source->GetOutputPort());
+//		auto actor =
+//			vtkSmartPointer<vtkActor>::New();
+//		actor->SetMapper(mapper);
+//		double r, g, b;
+//		r = vtkMath::Random(0.4, 1.0);
+//		g = vtkMath::Random(0.4, 1.0);
+//		b = vtkMath::Random(0.4, 1.0);
+//		actor->GetProperty()->SetDiffuseColor(r, g, b);
+//		actor->GetProperty()->SetDiffuse(0.8);
+//		actor->GetProperty()->SetSpecular(0.5);
+//		actor->GetProperty()->SetSpecularColor(
+//			colors->GetColor3d("White").GetData());
+//		actor->GetProperty()->SetSpecularPower(30.0);
+//		renderer->AddActor(actor);
+//	}
+//
+//	renderer->SetBackground(colors->GetColor3d("Bkg").GetData());
+//
+//	// Render and interact
+//	renderWindow->Render();
+//
+//	// Create the silhouette pipeline, the input data will be set in the
+//	// interactor
+//	auto silhouette =
+//		vtkSmartPointer<vtkPolyDataSilhouette>::New();
+//	silhouette->SetCamera(renderer->GetActiveCamera());
+//
+//	// Create mapper and actor for silhouette
+//	auto silhouetteMapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	silhouetteMapper->SetInputConnection(silhouette->GetOutputPort());
+//
+//	auto silhouetteActor =
+//		vtkSmartPointer<vtkActor>::New();
+//	silhouetteActor->SetMapper(silhouetteMapper);
+//	silhouetteActor->GetProperty()->SetColor(colors->GetColor3d("Tomato").GetData());
+//	silhouetteActor->GetProperty()->SetLineWidth(5);
+//
+//	// Set the custom type to use for interaction.
+//	auto style =
+//		vtkSmartPointer<MouseInteractorHighLightActor>::New();
+//	style->SetDefaultRenderer(renderer);
+//	style->SetSilhouetteActor(silhouetteActor);
+//	style->SetSilhouette(silhouette);
+//
+//	interactor->SetInteractorStyle(style);
+//
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
 
 //#include <vtkAutoInit.h>
@@ -5956,6 +5989,7 @@ int main(int argc, char* argv[])
 
 //选中actor高亮显示HighlightPickedActor
 
+
 //#include <vtkActor.h>
 //#include <vtkInteractorStyleTrackballCamera.h>
 //#include <vtkMinimalStandardRandomSequence.h>
@@ -6106,3 +6140,153 @@ int main(int argc, char* argv[])
 //}
 
 
+//#include <vtkActor.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkMinimalStandardRandomSequence.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkObjectFactory.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkPropPicker.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSphereSource.h>
+//
+//namespace {
+//	// Handle mouse events
+//	class MouseInteractorHighLightActor : public vtkInteractorStyleTrackballCamera
+//	{
+//	public:
+//		static MouseInteractorHighLightActor* New();
+//		vtkTypeMacro(MouseInteractorHighLightActor,
+//			vtkInteractorStyleTrackballCamera);
+//
+//		MouseInteractorHighLightActor()
+//		{
+//			LastPickedActor = NULL;
+//			LastPickedProperty = vtkProperty::New();
+//		}
+//		virtual ~MouseInteractorHighLightActor()
+//		{
+//			LastPickedProperty->Delete();
+//		}
+//		virtual void OnLeftButtonDown() override
+//		{
+//			vtkNew<vtkNamedColors> colors;
+//
+//			int* clickPos = this->GetInteractor()->GetEventPosition();
+//
+//			// Pick from this location.
+//			vtkNew<vtkPropPicker> picker;
+//			picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+//			this->LastPickedActor = picker->GetActor();
+//			// If we picked something before, reset its property
+//			if (this->LastPickedActor)
+//			{
+//				this->LastPickedActor->GetProperty()->DeepCopy(this->LastPickedProperty);
+//			}
+//
+//			if (this->LastPickedActor)
+//			{
+//				// Save the property of the picked actor so that we can
+//				// restore it next time
+//				this->LastPickedProperty->DeepCopy(this->LastPickedActor->GetProperty());
+//				// Highlight the picked actor by changing its properties
+//
+//				//this->LastPickedActor->GetProperty()->SetColor(
+//				//	colors->GetColor3d("Red").GetData());
+//				//this->LastPickedActor->GetProperty()->SetDiffuse(1.0);
+//				//this->LastPickedActor->GetProperty()->SetSpecular(0.0);
+//				//this->LastPickedActor->GetProperty()->EdgeVisibilityOn();
+//				this->GetDefaultRenderer()->RemoveActor(this->LastPickedActor);
+//			}
+//
+//			// Forward events
+//			vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+//		}
+//
+//	private:
+//		vtkActor* LastPickedActor;
+//		vtkProperty* LastPickedProperty;
+//	};
+//
+//	vtkStandardNewMacro(MouseInteractorHighLightActor);
+//} // namespace
+//
+//// Execute application.
+//int main(int argc, char* argv[])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	int numberOfSpheres = 10;
+//	if (argc > 1)
+//	{
+//		numberOfSpheres = atoi(argv[1]);
+//	}
+//	// A renderer and render window
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("HighlightPickedActor");
+//
+//	// An interactor
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	// Set the custom type to use for interaction.
+//	vtkNew<MouseInteractorHighLightActor> style;
+//	style->SetDefaultRenderer(renderer);
+//
+//	renderWindowInteractor->SetInteractorStyle(style);
+//
+//	vtkNew<vtkMinimalStandardRandomSequence> randomSequence;
+//	randomSequence->SetSeed(8775070);
+//	for (int i = 0; i < numberOfSpheres; ++i)
+//	{
+//		vtkNew<vtkSphereSource> source;
+//		double x, y, z, radius;
+//		// random position and radius
+//		x = randomSequence->GetRangeValue(-5.0, 5.0);
+//		randomSequence->Next();
+//		y = randomSequence->GetRangeValue(-5.0, 5.0);
+//		randomSequence->Next();
+//		z = randomSequence->GetRangeValue(-5.0, 5.0);
+//		randomSequence->Next();
+//		radius = randomSequence->GetRangeValue(0.5, 1.0);
+//		randomSequence->Next();
+//		source->SetRadius(radius);
+//		source->SetCenter(x, y, z);
+//		source->SetPhiResolution(11);
+//		source->SetThetaResolution(21);
+//		vtkNew<vtkPolyDataMapper> mapper;
+//		mapper->SetInputConnection(source->GetOutputPort());
+//		vtkNew<vtkActor> actor;
+//		actor->SetMapper(mapper);
+//		double r, g, b;
+//		r = randomSequence->GetRangeValue(0.4, 1.0);
+//		randomSequence->Next();
+//		g = randomSequence->GetRangeValue(0.4, 1.0);
+//		randomSequence->Next();
+//		b = randomSequence->GetRangeValue(0.4, 1.0);
+//		randomSequence->Next();
+//		actor->GetProperty()->SetDiffuseColor(r, g, b);
+//		actor->GetProperty()->SetDiffuse(0.8);
+//		actor->GetProperty()->SetSpecular(0.5);
+//		actor->GetProperty()->SetSpecularColor(
+//			colors->GetColor3d("White").GetData());
+//		actor->GetProperty()->SetSpecularPower(30.0);
+//		renderer->AddActor(actor);
+//	}
+//
+//	renderer->SetBackground(colors->GetColor3d("SteelBlue").GetData());
+//
+//	// Render and interact
+//	renderWindow->Render();
+//	renderWindowInteractor->Initialize();
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}

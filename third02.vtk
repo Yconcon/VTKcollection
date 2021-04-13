@@ -1,0 +1,25 @@
+# vtk DataFile Version 3.0
+Test
+ASCII
+DATASET UNSTRUCTURED_GRID
+
+POINTS 5 double
+0 0 0
+2 0 0
+2 2 0
+0 2 0
+1 1 2
+
+CELLS 1 6
+5 0 1 2 3 4
+
+CELL_TYPES 1
+14
+
+POINT_DATA 5
+SCALARS density double 1
+LOOKUP_TABLE default
+1 3 5 10 12
+
+
+

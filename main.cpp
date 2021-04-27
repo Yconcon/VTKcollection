@@ -2850,135 +2850,334 @@ int main(int argc, char* argv[])
 
 //读.vtk文件，染色，显示色卡，选择显示标量
 
-#include <vtkAppendFilter.h>
-#include <vtkSphereSource.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkUnstructuredGridReader.h>
-#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkLookupTable.h>
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <vtkScalarBarActor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkDataSetAttributes.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointData.h>
+//#include <vtkCellData.h>
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	reader->ReadAllScalarsOn();//获取所有的标量数据
+//	reader->ReadAllVectorsOn();
+//	reader->ReadAllNormalsOn();
+//	reader->ReadAllTensorsOn();
+//	reader->ReadAllColorScalarsOn();
+//	reader->ReadAllTCoordsOn();
+//	reader->ReadAllFieldsOn();
+//
+//	reader->SetFileName("Test01.vtk");
+//	reader->GetOutput()->Register(reader);
+//	reader->Update();
+//
+//	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
+//	cout << nNumScalar << endl;
+//
+//
+//	//std::cout << "Loading: " << argv[1] << std::endl;
+//	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
+//	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
+//		vtkSmartPointer<vtkPolyData>::New();
+//	auto unstructuredGrid = reader->GetOutput();
+//	cout << reader->GetScalarsNameInFile(0) << endl;
+//	cout << reader->GetScalarsNameInFile(1) << endl;
+//	//cout << reader->GetScalarsNameInFile(2) << endl;
+//	//cout << reader->GetScalarsNameInFile(3) << endl;
+//	//cout << reader->GetScalarsNameInFile(4) << endl;
+//	
+//	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
+//	reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> mapper;
+//	mapper->SetInputData(unstructuredGrid);
+//	//mapper->ScalarVisibilityOff();
+//	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//
+//	cout << unstructuredGrid->GetScalarRange()[0] << endl;
+//	cout << unstructuredGrid->GetScalarRange()[1] << endl;
+//
+//	vtkNew<vtkScalarBarActor> scalarbar;
+//	scalarbar->SetLookupTable(mapper->GetLookupTable());
+//	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+//	scalarbar->SetNumberOfLabels(5);
+//	renderer->AddActor2D(scalarbar);
+//
+//
+//	vtkNew<vtkAxesActor> axes;
+//
+//	vtkNew<vtkOrientationMarkerWidget> widget;
+//	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+//	colors->GetColor("Carrot", rgba);
+//	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+//	widget->SetOrientationMarker(axes);
+//	widget->SetInteractor(interactor);
+//	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+//	widget->SetEnabled(1);
+//	widget->InteractiveOn();
+//
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->EdgeVisibilityOn();//显示网格
+//	//actor->SetBackfaceProperty(backProp);
+//	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//	//actor->GetProperty()->SetSpecular(.3);
+//	//actor->GetProperty()->SetSpecularPower(30);
+//	//actor->GetProperty()->EdgeVisibilityOn();
+//	actor->GetProperty()->SetOpacity(0.1);
+//
+//	renderer->AddActor(actor);
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
 
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkDataSetMapper.h>
-#include <vtkNamedColors.h>
-#include <vtkNew.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#include <vtkLookupTable.h>
-#include <algorithm>
-#include <array>
-#include <string>
-#include <vtkScalarBarActor.h>
-#include <vtkAxesActor.h>
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkDataSetAttributes.h>
-#include <vtkPolyData.h>
-#include <vtkPointData.h>
-
-namespace {
-	vtkSmartPointer<vtkUnstructuredGrid>
-		ReadUnstructuredGrid(std::string const& fileName);
-}
-
-int main(int argc, char* argv[])
-{
-	// Vis Pipeline
-	vtkNew<vtkNamedColors> colors;
-
-	vtkNew<vtkRenderer> renderer;
-
-	vtkNew<vtkRenderWindow> renderWindow;
-	renderWindow->SetSize(640, 480);
-	renderWindow->AddRenderer(renderer);
-
-	vtkNew<vtkRenderWindowInteractor> interactor;
-	interactor->SetRenderWindow(renderWindow);
-
-	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
-	renderer->UseHiddenLineRemovalOn();
-
-	vtkNew<vtkUnstructuredGridReader> reader;
-	reader->ReadAllScalarsOn();//获取所有的标量数据
-	reader->ReadAllVectorsOn();
-	reader->ReadAllNormalsOn();
-	reader->ReadAllTensorsOn();
-	reader->ReadAllColorScalarsOn();
-	reader->ReadAllTCoordsOn();
-	reader->ReadAllFieldsOn();
-
-	reader->SetFileName("Test02.vtk");
-	reader->GetOutput()->Register(reader);
-	reader->Update();
-
-	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
-	cout << nNumScalar << endl;
-
-
-	//std::cout << "Loading: " << argv[1] << std::endl;
-	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
-	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
-		vtkSmartPointer<vtkPolyData>::New();
-	auto unstructuredGrid = reader->GetOutput();
-	cout << reader->GetScalarsNameInFile(0) << endl;
-	cout << reader->GetScalarsNameInFile(1) << endl;
-	cout << reader->GetScalarsNameInFile(2) << endl;
-	
-	reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
-	
-
-	vtkNew<vtkLookupTable> lut1;
-	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
-	// Visualize
-	vtkNew<vtkDataSetMapper> mapper;
-	mapper->SetInputData(unstructuredGrid);
-	//mapper->ScalarVisibilityOff();
-	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
-	mapper->SetLookupTable(lut1);
-	mapper->SetColorModeToMapScalars();
-
-	cout << unstructuredGrid->GetScalarRange()[0] << endl;
-	cout << unstructuredGrid->GetScalarRange()[1] << endl;
-
-	vtkNew<vtkScalarBarActor> scalarbar;
-	scalarbar->SetLookupTable(mapper->GetLookupTable());
-	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
-	scalarbar->SetNumberOfLabels(5);
-	renderer->AddActor2D(scalarbar);
-
-
-	vtkNew<vtkAxesActor> axes;
-
-	vtkNew<vtkOrientationMarkerWidget> widget;
-	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
-	colors->GetColor("Carrot", rgba);
-	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
-	widget->SetOrientationMarker(axes);
-	widget->SetInteractor(interactor);
-	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
-	widget->SetEnabled(1);
-	widget->InteractiveOn();
-
-	vtkNew<vtkActor> actor;
-	actor->SetMapper(mapper);
-	actor->GetProperty()->EdgeVisibilityOn();//显示网格
-	//actor->SetBackfaceProperty(backProp);
-	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
-	//actor->GetProperty()->SetSpecular(.3);
-	//actor->GetProperty()->SetSpecularPower(30);
-	//actor->GetProperty()->EdgeVisibilityOn();
-	renderer->AddActor(actor);
-	renderer->GetActiveCamera()->Azimuth(45);
-	renderer->GetActiveCamera()->Elevation(45);
-	renderer->ResetCamera();
-	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
-	renderWindow->Render();
-	interactor->Start();
-
-	return EXIT_SUCCESS;
-}
+//2021/4/16 忘了是什么了
+//#include <vtkVersion.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPointPicker.h>
+//#include <vtkSphereSource.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkPointData.h>
+//#include <vtkIdTypeArray.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkRendererCollection.h>
+//#include <vtkProperty.h>
+//#include <vtkPlanes.h>
+//#include <vtkObjectFactory.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkActor.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointSource.h>
+//#include <vtkInteractorStyleTrackballActor.h>
+//#include <vtkAreaPicker.h>
+//#include <vtkExtractGeometry.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkVertexGlyphFilter.h>
+//#include <vtkIdFilter.h>
+//
+//// Define interaction style
+//class InteractorStyle2 : public vtkInteractorStyleTrackballActor
+//{
+//public:
+//	static InteractorStyle2* New();
+//	vtkTypeMacro(InteractorStyle2, vtkInteractorStyleTrackballActor);
+//
+//	InteractorStyle2()
+//	{
+//		this->Move = false;
+//		this->PointPicker = vtkSmartPointer<vtkPointPicker>::New();
+//
+//		// Setup ghost glyph
+//		vtkSmartPointer<vtkPoints> points =
+//			vtkSmartPointer<vtkPoints>::New();
+//		points->InsertNextPoint(0, 0, 0);
+//		this->MovePolyData = vtkSmartPointer<vtkPolyData>::New();
+//		this->MovePolyData->SetPoints(points);
+//		this->MoveGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+//#if VTK_MAJOR_VERSION <= 5
+//		this->MoveGlyphFilter->SetInputConnection(
+//			this->MovePolyData->GetProducerPort());
+//#else
+//		this->MoveGlyphFilter->SetInputData(this->MovePolyData);
+//#endif
+//		this->MoveGlyphFilter->Update();
+//
+//		this->MoveMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//		this->MoveMapper->SetInputConnection(this->MoveGlyphFilter->GetOutputPort());
+//
+//		this->MoveActor = vtkSmartPointer<vtkActor>::New();
+//		this->MoveActor->SetMapper(this->MoveMapper);
+//		this->MoveActor->VisibilityOff();
+//		this->MoveActor->GetProperty()->SetPointSize(10);
+//		this->MoveActor->GetProperty()->SetColor(1, 0, 0);
+//	}
+//
+//	void OnMouseMove()
+//	{
+//		if (!this->Move)
+//		{
+//			return;
+//		}
+//
+//		vtkInteractorStyleTrackballActor::OnMouseMove();
+//
+//	}
+//
+//	void OnMiddleButtonUp()
+//	{
+//		this->EndPan();
+//
+//		this->Move = false;
+//		this->MoveActor->VisibilityOff();
+//
+//		this->Data->GetPoints()->SetPoint(this->SelectedPoint, this->MoveActor->GetPosition());
+//		this->Data->Modified();
+//		this->GetCurrentRenderer()->Render();
+//		this->GetCurrentRenderer()->GetRenderWindow()->Render();
+//
+//	}
+//	void OnMiddleButtonDown()
+//	{
+//		// Get the selected point
+//		int x = this->Interactor->GetEventPosition()[0];
+//		int y = this->Interactor->GetEventPosition()[1];
+//		this->FindPokedRenderer(x, y);
+//
+//		this->PointPicker->Pick(this->Interactor->GetEventPosition()[0],
+//			this->Interactor->GetEventPosition()[1],
+//			0,  // always zero.
+//			this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
+//
+//		if (this->PointPicker->GetPointId() >= 0)
+//		{
+//			this->StartPan();
+//			this->MoveActor->VisibilityOn();
+//			this->Move = true;
+//			this->SelectedPoint = this->PointPicker->GetPointId();
+//
+//			std::cout << "Dragging point " << this->SelectedPoint << std::endl;
+//
+//			double p[3];
+//			this->Data->GetPoint(this->SelectedPoint, p);
+//			std::cout << "p: " << p[0] << " " << p[1] << " " << p[2] << std::endl;
+//			this->MoveActor->SetPosition(p);
+//
+//			this->GetCurrentRenderer()->AddActor(this->MoveActor);
+//			this->InteractionProp = this->MoveActor;
+//		}
+//	}
+//
+//	vtkPolyData* Data;
+//	vtkPolyData* GlyphData;
+//
+//	vtkSmartPointer<vtkPolyDataMapper> MoveMapper;
+//	vtkSmartPointer<vtkActor> MoveActor;
+//	vtkSmartPointer<vtkPolyData> MovePolyData;
+//	vtkSmartPointer<vtkVertexGlyphFilter> MoveGlyphFilter;
+//
+//	vtkSmartPointer<vtkPointPicker> PointPicker;
+//
+//	bool Move;
+//	vtkIdType SelectedPoint;
+//};
+//vtkStandardNewMacro(InteractorStyle2);
+//
+//int main(int, char* [])
+//{
+//	vtkSmartPointer<vtkPoints> points =
+//		vtkSmartPointer<vtkPoints>::New();
+//	points->InsertNextPoint(0, 0, 0);
+//	points->InsertNextPoint(1, 0, 0);
+//	points->InsertNextPoint(2, 0, 0);
+//
+//	vtkSmartPointer<vtkPolyData> input =
+//		vtkSmartPointer<vtkPolyData>::New();
+//	input->SetPoints(points);
+//
+//	vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =
+//		vtkSmartPointer<vtkVertexGlyphFilter>::New();
+//#if VTK_MAJOR_VERSION <= 5
+//	glyphFilter->SetInputConnection(input->GetProducerPort());
+//#else
+//	glyphFilter->SetInputData(input);
+//#endif
+//	glyphFilter->Update();
+//
+//	// Create a mapper and actor
+//	vtkSmartPointer<vtkPolyDataMapper> mapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	mapper->SetInputConnection(glyphFilter->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> actor =
+//		vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->SetPointSize(10);
+//
+//	// Visualize
+//	vtkSmartPointer<vtkRenderer> renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	vtkSmartPointer<vtkRenderWindow> renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	renderer->AddActor(actor);
+//	//renderer->SetBackground(1,1,1); // Background color white
+//
+//	renderWindow->Render();
+//
+//	vtkSmartPointer<InteractorStyle2> style =
+//		vtkSmartPointer<InteractorStyle2>::New();
+//	renderWindowInteractor->SetInteractorStyle(style);
+//	style->Data = input;
+//
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
 
 
@@ -5860,70 +6059,70 @@ int main(int, char* [])
 
 //鼠标点击放置球体
 
-//#include <vtkActor.h>
-//#include <vtkCellArray.h>
+//#include <vtkactor.h>
+//#include <vtkcellarray.h>
 //#include <vtkInteractorStyleTrackballCamera.h>
-//#include <vtkNamedColors.h>
-//#include <vtkNew.h>
-//#include <vtkObjectFactory.h>
-//#include <vtkPlaneSource.h>
-//#include <vtkPoints.h>
-//#include <vtkPolyData.h>
-//#include <vtkPolyDataMapper.h>
-//#include <vtkPropPicker.h>
-//#include <vtkProperty.h>
-//#include <vtkRenderWindow.h>
-//#include <vtkRenderWindowInteractor.h>
-//#include <vtkRenderer.h>
-//#include <vtkRendererCollection.h>
-//#include <vtkSphereSource.h>
+//#include <vtknamedcolors.h>
+//#include <vtknew.h>
+//#include <vtkobjectfactory.h>
+//#include <vtkplanesource.h>
+//#include <vtkpoints.h>
+//#include <vtkpolydata.h>
+//#include <vtkpolydatamapper.h>
+//#include <vtkproppicker.h>
+//#include <vtkproperty.h>
+//#include <vtkrenderwindow.h>
+//#include <vtkrenderwindowinteractor.h>
+//#include <vtkrenderer.h>
+//#include <vtkrenderercollection.h>
+//#include <vtkspheresource.h>
 //
 //namespace {
 //
-//	// Handle mouse events
-//	class MouseInteractorStyle2 : public vtkInteractorStyleTrackballCamera
+//	// handle mouse events
+//	class mouseinteractorstyle2 : public vtkInteractorStyleTrackballCamera
 //	{
 //	public:
-//		static MouseInteractorStyle2* New();
-//		vtkTypeMacro(MouseInteractorStyle2, vtkInteractorStyleTrackballCamera);
+//		static mouseinteractorstyle2* New();
+//		vtkTypeMacro(mouseinteractorstyle2, vtkInteractorStyleTrackballCamera);
 //		vtkNew<vtkNamedColors> colors;
 //
 //		virtual void OnLeftButtonDown() override
 //		{
-//			int* clickPos = this->GetInteractor()->GetEventPosition();
+//			int* clickpos = this->GetInteractor()->GetEventPosition();
 //
-//			// Pick from this location.
+//			// pick from this location.
 //			vtkNew<vtkPropPicker> picker;
-//			picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+//			picker->Pick(clickpos[0], clickpos[1], 0, this->GetDefaultRenderer());
 //
 //			double* pos = picker->GetPickPosition();
-//			std::cout << "Pick position (world coordinates) is: " << pos[0] << " "
+//			std::cout << "pick position (world coordinates) is: " << pos[0] << " "
 //				<< pos[1] << " " << pos[2] << std::endl;
-//
-//			auto pickedActor = picker->GetActor();
-//			if (pickedActor == nullptr)
+//			 
+//			auto pickedactor = picker->GetActor();
+//			if (pickedactor == nullptr)
 //			{
-//				std::cout << "No actor picked." << std::endl;
+//				std::cout << "no actor picked." << std::endl;
 //			}
 //			else
 //			{
-//				std::cout << "Picked actor: " << picker->GetActor() << std::endl;
-//				// Create a sphere
-//				// Create a sphere
-//				vtkNew<vtkSphereSource> sphereSource;
-//				sphereSource->SetCenter(pos[0], pos[1], pos[2]);
-//				sphereSource->SetRadius(0.1);
+//				std::cout << "picked actor: " << picker->GetActor() << std::endl;
+//				// create a sphere
+//				// create a sphere
+//				vtkNew<vtkSphereSource> spheresource;
+//				spheresource->SetCenter(pos[0], pos[1], pos[2]);
+//				spheresource->SetRadius(0.1);
 //
-//				// Create a mapper and actor
+//				// create a mapper and actor
 //				vtkNew<vtkPolyDataMapper> mapper;
-//				mapper->SetInputConnection(sphereSource->GetOutputPort());
+//				mapper->SetInputConnection(spheresource->GetOutputPort());
 //
 //				vtkNew<vtkActor> actor;
 //				actor->SetMapper(mapper);
-//				actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+//				actor->GetProperty()->SetColor(colors->GetColor3d("mistyrose").GetData());
 //
 //				this->GetDefaultRenderer()->AddActor(actor);
-//				// Forward events
+//				// forward events
 //				vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
 //			}
 //		}
@@ -5931,57 +6130,57 @@ int main(int, char* [])
 //	private:
 //	};
 //
-//	vtkStandardNewMacro(MouseInteractorStyle2);
+//	vtkStandardNewMacro(mouseinteractorstyle2);
 //
 //} // namespace
 //
-//// Execute application.
+//// execute application.
 //int main(int, char* [])
 //{
 //	vtkNew<vtkNamedColors> colors;
 //
-//	vtkNew<vtkPlaneSource> planeSource;
-//	planeSource->Update();
+//	vtkNew<vtkPlaneSource> planesource;
+//	planesource->Update();
 //
-//	// Create a polydata object
-//	vtkPolyData* polydata = planeSource->GetOutput();
+//	// create a polydata object
+//	vtkPolyData* polydata = planesource->GetOutput();
 //
-//	// Create a mapper
+//	// create a mapper
 //	vtkNew<vtkPolyDataMapper> mapper;
 //	mapper->SetInputData(polydata);
 //
-//	// Create an actor
+//	// create an actor
 //	vtkNew<vtkActor> actor;
 //	actor->SetMapper(mapper);
 //	actor->GetProperty()->SetColor(
-//		colors->GetColor3d("LightGoldenrodYellow").GetData());
+//		colors->GetColor3d("lightgoldenrodyellow").GetData());
 //
-//	std::cout << "Actor address: " << actor << std::endl;
+//	std::cout << "actor address: " << actor << std::endl;
 //
-//	// A renderer and render window
+//	// a renderer and render window
 //	vtkNew<vtkRenderer> renderer;
-//	vtkNew<vtkRenderWindow> renderWindow;
-//	renderWindow->AddRenderer(renderer);
-//	renderWindow->SetWindowName("Picking");
+//	vtkNew<vtkRenderWindow> renderwindow;
+//	renderwindow->AddRenderer(renderer);
+//	renderwindow->SetWindowName("picking");
 //
-//	// An interactor
-//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
-//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//	// an interactor
+//	vtkNew<vtkRenderWindowInteractor> renderwindowinteractor;
+//	renderwindowinteractor->SetRenderWindow(renderwindow);
 //
-//	// Set the custom stype to use for interaction.
-//	vtkNew<MouseInteractorStyle2> style;
+//	// set the custom stype to use for interaction.
+//	vtkNew<mouseinteractorstyle2> style;
 //	style->SetDefaultRenderer(renderer);
 //
-//	renderWindowInteractor->SetInteractorStyle(style);
+//	renderwindowinteractor->SetInteractorStyle(style);
 //
-//	// Add the actors to the scene
+//	// add the actors to the scene
 //	renderer->AddActor(actor);
-//	renderer->SetBackground(colors->GetColor3d("DodgerBlue").GetData());
+//	renderer->SetBackground(colors->GetColor3d("dodgerblue").GetData());
 //
-//	// Render and interact
-//	renderWindow->Render();
-//	renderWindowInteractor->Initialize();
-//	renderWindowInteractor->Start();
+//	// render and interact
+//	renderwindow->Render();
+//	renderwindowinteractor->Initialize();
+//	renderwindowinteractor->Start();
 //
 //	return EXIT_SUCCESS;
 //}
@@ -6287,6 +6486,903 @@ int main(int, char* [])
 //	renderWindow->Render();
 //	renderWindowInteractor->Initialize();
 //	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//vectorAcotrs sphere
+
+//#include <vtkActor.h>
+//#include <vtkInteractorStyleTrackball.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkNew.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkSphereSource.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//
+//
+//#include <vector>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	std::vector<vtkSmartPointer<vtkActor>> actors;
+//
+//	for (unsigned int i = 0; i < 10; i++)
+//	{
+//		vtkNew<vtkSphereSource> sphereSource;
+//		sphereSource->SetCenter(i, 0.0, 0.0);
+//		sphereSource->SetRadius(0.2);
+//
+//		vtkNew<vtkPolyDataMapper> mapper;
+//		mapper->SetInputConnection(sphereSource->GetOutputPort());
+//
+//		vtkNew<vtkActor> actor;
+//		actor->SetMapper(mapper);
+//		actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+//
+//		actors.push_back(actor);
+//	}
+//
+//	// A renderer and render window
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("VectorOfActors");
+//
+//	// An interactor
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	// Add the actors to the scene
+//	for (unsigned int i = 0; i < actors.size(); i++)
+//	{
+//		renderer->AddActor(actors[i]);
+//	}
+//
+//	renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
+//
+//	// Render
+//	renderWindow->Render();
+//
+//	vtkNew<vtkInteractorStyleTrackballCamera> style;
+//
+//	renderWindowInteractor->SetInteractorStyle(style);
+//
+//	// Begin mouse interaction
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+//cubeGlyph3D
+
+//#include <vtkActor.h>
+//#include <vtkCellArray.h>
+//#include <vtkCubeSource.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPoints.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkPoints> points;
+//	points->InsertNextPoint(0, 0, 0);
+//	points->InsertNextPoint(1, 1, 0);
+//	points->InsertNextPoint(2, 2, 0);
+//
+//	vtkNew<vtkPolyData> polydata;
+//	polydata->SetPoints(points);
+//
+//	// Create anything you want here, we will use a cube for the demo.
+//	vtkNew<vtkCubeSource> cubeSource;
+//
+//	vtkNew<vtkGlyph3D> glyph3D;
+//	glyph3D->SetSourceConnection(cubeSource->GetOutputPort());
+//	glyph3D->SetInputData(polydata);
+//	glyph3D->Update();
+//
+//	// Visualize
+//	vtkNew<vtkPolyDataMapper> mapper;
+//	mapper->SetInputConnection(glyph3D->GetOutputPort());
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->SetColor(colors->GetColor3d("Salmon").GetData());
+//
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	renderer->AddActor(actor);
+//	renderer->SetBackground(colors->GetColor3d("SlateGray").GetData());
+//
+//	renderWindow->SetWindowName("Glyph3D");
+//	renderWindow->Render();
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+//#include <vtkActor.h>
+//#include <vtkInteractorStyleTrackball.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkNew.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkSphereSource.h>
+//#include <vtkArrowSource.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//
+//
+//#include <vector>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	std::vector<vtkSmartPointer<vtkActor>> actors;
+//
+//	for (unsigned int i = 0; i < 10; i++)
+//	{
+//		vtkNew<vtkArrowSource> arrowSource;
+//		//arrowSource->SetCenter(i, 0.0, 0.0);
+//		//arrowSource->SetRadius(0.2);
+//		arrowSource->set
+//
+//		vtkNew<vtkPolyDataMapper> mapper;
+//		mapper->SetInputConnection(arrowSource->GetOutputPort());
+//
+//		vtkNew<vtkActor> actor;
+//		actor->SetMapper(mapper);
+//		actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+//
+//		actors.push_back(actor);
+//	}
+//
+//	// A renderer and render window
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("VectorOfActors");
+//
+//	// An interactor
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	// Add the actors to the scene
+//	for (unsigned int i = 0; i < actors.size(); i++)
+//	{
+//		renderer->AddActor(actors[i]);
+//	}
+//
+//	renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
+//
+//	// Render
+//	renderWindow->Render();
+//
+//	vtkNew<vtkInteractorStyleTrackballCamera> style;
+//
+//	renderWindowInteractor->SetInteractorStyle(style);
+//
+//	// Begin mouse interaction
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//glyph3Dmapper
+
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkCellArray.h>
+//#include <vtkCubeSource.h>
+//#include <vtkArrowSource.h>
+//#include <vtkFloatArray.h>
+//#include <vtkGlyph3DMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPointData.h>
+//#include <vtkPoints.h>
+//#include <vtkPolyData.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkUnsignedCharArray.h>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkPoints> points;
+//	points->InsertNextPoint(0, 0, 0);
+//	points->InsertNextPoint(1, 1, 1);
+//	points->InsertNextPoint(2, 2, 2);
+//
+//	vtkNew<vtkFloatArray> scaleFactors;
+//	scaleFactors->SetNumberOfComponents(3);
+//	scaleFactors->SetName("Scale Factors");
+//	scaleFactors->InsertNextTuple3(0.7, 1.0, 1.0);
+//	scaleFactors->InsertNextTuple3(1.0, 0.7, 1.0);
+//	scaleFactors->InsertNextTuple3(1.0, 1.0, 0.7);
+//
+//	vtkNew<vtkNamedColors> namedColors;
+//
+//	vtkNew<vtkUnsignedCharArray> colors;
+//	colors->SetName("Colors");
+//	colors->SetNumberOfComponents(3);
+//	colors->InsertNextTypedTuple(namedColors->GetColor3ub("Red").GetData());
+//	colors->InsertNextTypedTuple(namedColors->GetColor3ub("Green").GetData());
+//	colors->InsertNextTypedTuple(namedColors->GetColor3ub("Blue").GetData());
+//
+//	vtkNew<vtkPolyData> polydata;
+//	polydata->SetPoints(points);
+//	polydata->GetPointData()->AddArray(colors);
+//	polydata->GetPointData()->AddArray(scaleFactors);
+//
+//	// Create anything you want here, we will use a cube for the demo.
+//	//vtkNew<vtkCubeSource> cubeSource;
+//	vtkNew<vtkArrowSource> cubeSource;
+//
+//	vtkNew<vtkGlyph3DMapper> glyph3Dmapper;
+//	glyph3Dmapper->SetSourceConnection(cubeSource->GetOutputPort());
+//	glyph3Dmapper->SetInputData(polydata);
+//	glyph3Dmapper->SetScalarModeToUsePointFieldData();
+//	glyph3Dmapper->SetScaleArray("Scale Factors");
+//	glyph3Dmapper->SetScaleModeToScaleByVectorComponents();
+//	glyph3Dmapper->SelectColorArray("Colors");
+//	glyph3Dmapper->Update();
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(glyph3Dmapper);
+//
+//	// Create a renderer, render window, and interactor
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("Glyph3DMapper");
+//
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	// Add the actor to the scene
+//	renderer->AddActor(actor);
+//	renderer->SetBackground(namedColors->GetColor3d("SlateGray").GetData());
+//
+//	// Position the camera
+//	renderer->GetActiveCamera()->SetPosition(-10, 5, 0);
+//	renderer->GetActiveCamera()->SetFocalPoint(1, 1, 1);
+//
+//	// Render and interact
+//	renderWindow->Render();
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkConeSource.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSphereSource.h>
+//
+//#include <array>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	// Set the background color.
+//	std::array<unsigned char, 4> bkg{ {26, 51, 102, 255} };
+//	colors->SetColor("Bkg", bkg.data());
+//
+//	// Create the rendering objects.
+//	vtkNew<vtkRenderer> ren1;
+//	vtkNew<vtkRenderWindow> renWin;
+//	renWin->AddRenderer(ren1);
+//	vtkNew<vtkRenderWindowInteractor> iren;
+//	iren->SetRenderWindow(renWin);
+//
+//	// Create the pipeline, ball and spikes.
+//	vtkNew<vtkSphereSource> sphere;
+//	sphere->SetPhiResolution(7);
+//	sphere->SetThetaResolution(7);
+//	vtkNew<vtkPolyDataMapper> sphereMapper;
+//	sphereMapper->SetInputConnection(sphere->GetOutputPort());
+//	vtkNew<vtkActor> sphereActor;
+//	sphereActor->SetMapper(sphereMapper);
+//	vtkNew<vtkActor> sphereActor2;
+//	sphereActor2->SetMapper(sphereMapper);
+//
+//	vtkNew<vtkConeSource> cone;
+//	cone->SetResolution(5);
+//	vtkNew<vtkGlyph3D> glyph;
+//	glyph->SetInputConnection(sphere->GetOutputPort());
+//	glyph->SetSourceConnection(cone->GetOutputPort());
+//	glyph->SetVectorModeToUseNormal();
+//	glyph->SetScaleModeToScaleByVector();
+//	glyph->SetScaleFactor(0.25);
+//	vtkNew<vtkPolyDataMapper> spikeMapper;
+//	spikeMapper->SetInputConnection(glyph->GetOutputPort());
+//	vtkNew<vtkActor> spikeActor;
+//	spikeActor->SetMapper(spikeMapper);
+//	vtkNew<vtkActor> spikeActor2;
+//	spikeActor2->SetMapper(spikeMapper);
+//
+//	spikeActor->SetPosition(0, 0.7, 0);
+//	sphereActor->SetPosition(0, 0.7, 0);
+//	spikeActor2->SetPosition(0, -1.0, -10);
+//	sphereActor2->SetPosition(0, -1.0, -10);
+//	spikeActor2->SetScale(1.5, 1.5, 1.5);
+//	sphereActor2->SetScale(1.5, 1.5, 1.5);
+//
+//	ren1->AddActor(sphereActor);
+//	ren1->AddActor(spikeActor);
+//	ren1->AddActor(sphereActor2);
+//	ren1->AddActor(spikeActor2);
+//	ren1->SetBackground(colors->GetColor3d("Bkg").GetData());
+//	renWin->SetSize(300, 300);
+//	renWin->SetWindowName("CameraBlur");
+//	//   renWin->DoubleBufferOff();
+//
+//	// Do the first render and then zoom in a little.
+//	renWin->Render();
+//	ren1->GetActiveCamera()->SetFocalPoint(0, 0, 0.0);
+//	ren1->GetActiveCamera()->Zoom(1.8);
+//	ren1->GetActiveCamera()->SetFocalDisk(0.05);
+//
+//	renWin->Render();
+//
+//	iren->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+//箭头
+
+#include <vtkAppendFilter.h>
+#include <vtkSphereSource.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkXMLUnstructuredGridReader.h>
+
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkDataSetMapper.h>
+#include <vtkNamedColors.h>
+#include <vtkNew.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+#include <vtkLookupTable.h>
+#include <algorithm>
+#include <array>
+#include <string>
+#include <vtkScalarBarActor.h>
+#include <vtkAxesActor.h>
+#include <vtkOrientationMarkerWidget.h>
+#include <vtkDataSetAttributes.h>
+#include <vtkPolyData.h>
+#include <vtkPointData.h>
+#include <vtkCellData.h>
+#include <vtkArrowSource.h>
+#include <vtkGlyph3D.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkInteractorStyleTrackballCamera.h>
+
+namespace {
+	vtkSmartPointer<vtkUnstructuredGrid>
+		ReadUnstructuredGrid(std::string const& fileName);
+}
+
+int main(int argc, char* argv[])
+{
+	// Vis Pipeline
+	vtkNew<vtkNamedColors> colors;
+	vtkNew<vtkRenderer> renderer;
+	vtkNew<vtkRenderWindow> renderWindow;
+
+	renderWindow->SetSize(640, 480);
+	renderWindow->AddRenderer(renderer);
+
+	vtkNew<vtkInteractorStyleTrackballCamera> style;
+
+	vtkNew<vtkRenderWindowInteractor> interactor;
+
+	interactor->SetInteractorStyle(style);
+	interactor->SetRenderWindow(renderWindow);
+
+	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+	renderer->UseHiddenLineRemovalOn();
+
+	vtkNew<vtkUnstructuredGridReader> reader;
+	reader->ReadAllScalarsOn();//获取所有的标量数据
+	reader->ReadAllVectorsOn();
+	reader->ReadAllNormalsOn();
+	reader->ReadAllTensorsOn();
+	reader->ReadAllColorScalarsOn();
+	reader->ReadAllTCoordsOn();
+	reader->ReadAllFieldsOn();
+	
+
+	reader->SetFileName("1.vtk");
+	reader->GetOutput()->Register(reader);
+	reader->Update();
+
+	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
+	cout << nNumScalar << endl;
+
+
+	//std::cout << "Loading: " << argv[1] << std::endl;
+	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
+	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
+		vtkSmartPointer<vtkPolyData>::New();
+	auto unstructuredGrid = reader->GetOutput();
+	cout << reader->GetScalarsNameInFile(0) << endl;
+	cout << reader->GetScalarsNameInFile(1) << endl;
+	cout << reader->GetVectorsNameInFile(0) << endl;
+	
+	vtkNew<vtkArrowSource> arrow;
+	vtkNew<vtkGlyph3D> glyphs;
+	glyphs->SetSourceConnection(arrow->GetOutputPort());
+	glyphs->SetInputConnection(reader->GetOutputPort());
+	glyphs->ScalingOn();
+	glyphs->SetScaleModeToScaleByVector();
+	glyphs->SetScaleFactor(0.25);
+	glyphs->OrientOn();
+	glyphs->ClampingOff();
+	glyphs->SetVectorModeToUseVector();
+	glyphs->SetIndexModeToOff();
+
+
+
+	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
+	//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+
+	vtkNew<vtkLookupTable> lut1;
+	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+
+
+	vtkNew<vtkPolyDataMapper> glyphMapper;
+	glyphMapper->SetInputConnection(glyphs->GetOutputPort());
+	//glyphMapper->ScalarVisibilityOff();
+	glyphMapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+	glyphMapper->SetLookupTable(lut1);
+	glyphMapper->SetColorModeToMapScalars();
+
+	// Visualize
+	vtkNew<vtkDataSetMapper> mapper;
+	//mapper->ScalarVisibilityOff();
+	mapper->SetInputData(unstructuredGrid);
+	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+	mapper->SetLookupTable(lut1);
+	mapper->SetColorModeToMapScalars();
+
+	cout << unstructuredGrid->GetScalarRange()[0] << endl;
+	cout << unstructuredGrid->GetScalarRange()[1] << endl;
+
+	vtkNew<vtkScalarBarActor> scalarbar;
+	scalarbar->SetLookupTable(glyphMapper->GetLookupTable());
+	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+	scalarbar->SetNumberOfLabels(5);
+	renderer->AddActor2D(scalarbar);
+
+	vtkNew<vtkAxesActor> axes;
+
+	vtkNew<vtkOrientationMarkerWidget> widget;
+	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+	colors->GetColor("Carrot", rgba);
+	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+	widget->SetOrientationMarker(axes);
+	widget->SetInteractor(interactor);
+	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+	widget->SetEnabled(1);
+	widget->InteractiveOn();
+
+
+	vtkNew<vtkActor> glyphActor;
+	glyphActor->SetMapper(glyphMapper);
+	glyphActor->GetProperty()->EdgeVisibilityOn();//显示网格
+	glyphActor->GetProperty()->SetOpacity(1);
+
+	vtkNew<vtkActor> actor;
+	actor->SetMapper(mapper);
+	actor->GetProperty()->EdgeVisibilityOn();//显示网格
+	actor->GetProperty()->SetOpacity(1);
+
+	renderer->AddActor(glyphActor);
+	renderer->AddActor(actor);
+
+	renderer->GetActiveCamera()->Azimuth(45);
+	renderer->GetActiveCamera()->Elevation(45);
+	renderer->ResetCamera();
+	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+	renderWindow->Render();
+	interactor->Start();
+
+	return EXIT_SUCCESS;
+}
+
+
+
+//generate point normals using local tangent planes 指向球体外法向的球体轮廓箭头
+
+//#include <vtkArrowSource.h>
+//#include <vtkCamera.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPCANormalEstimation.h>
+//#include <vtkPointSource.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSphereSource.h>
+//
+//namespace {
+//	void MakeGlyphs(vtkPolyData* src, double size, vtkGlyph3D* glyph);
+//}
+//
+//int main(int, char* [])
+//{
+//	double radius = 1.0;
+//	vtkNew<vtkPointSource> points;
+//	points->SetNumberOfPoints(600);
+//	points->SetRadius(radius);
+//	points->SetCenter(0.0, 0.0, 0.0);
+//	points->SetDistributionToShell();
+//
+//	int sampleSize = 10;
+//	vtkNew<vtkPCANormalEstimation> normals;
+//	normals->SetInputConnection(points->GetOutputPort());
+//	normals->SetSampleSize(sampleSize);
+//	normals->SetNormalOrientationToGraphTraversal();
+//	normals->Update();
+//
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkGlyph3D> glyph3D;
+//	MakeGlyphs(normals->GetOutput(), radius * 0.3, glyph3D.GetPointer());
+//
+//	vtkNew<vtkPolyDataMapper> glyph3DMapper;
+//	glyph3DMapper->SetInputConnection(glyph3D->GetOutputPort());
+//
+//	vtkNew<vtkActor> glyph3DActor;
+//	glyph3DActor->SetMapper(glyph3DMapper);
+//	glyph3DActor->GetProperty()->SetDiffuseColor(
+//		colors->GetColor3d("Banana").GetData());
+//
+//	vtkNew<vtkSphereSource> sphere;
+//	sphere->SetRadius(1.0);
+//	sphere->SetThetaResolution(41);
+//	sphere->SetPhiResolution(21);
+//
+//	vtkNew<vtkPolyDataMapper> sphereMapper;
+//	sphereMapper->SetInputConnection(sphere->GetOutputPort());
+//
+//	vtkNew<vtkActor> sphereActor;
+//	sphereActor->SetMapper(sphereMapper);
+//	sphereActor->GetProperty()->SetDiffuseColor(
+//		colors->GetColor3d("Tomato").GetData());
+//
+//	// Create graphics stuff
+//	//
+//	vtkNew<vtkRenderer> renderer;
+//	renderer->SetBackground(colors->GetColor3d("SlateGray").GetData());
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->SetWindowName("NormalEstimation");
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	// Add the actors to the renderer, set the background and size
+//	//
+//	renderer->AddActor(glyph3DActor);
+//	renderer->AddActor(sphereActor);
+//
+//	// Generate an interesting view
+//	//
+//	renderer->ResetCamera();
+//	renderer->GetActiveCamera()->Azimuth(120);
+//	renderer->GetActiveCamera()->Elevation(30);
+//	renderer->GetActiveCamera()->Dolly(1.0);
+//	renderer->ResetCameraClippingRange();
+//
+//	renderWindow->Render();
+//	interactor->Initialize();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+//namespace {
+//	void MakeGlyphs(vtkPolyData* src, double size, vtkGlyph3D* glyph)
+//	{
+//		// Source for the glyph filter
+//		vtkNew<vtkArrowSource> arrow;
+//		arrow->SetTipResolution(16);
+//		arrow->SetTipLength(0.3);
+//		arrow->SetTipRadius(0.1);
+//
+//		glyph->SetSourceConnection(arrow->GetOutputPort());
+//		glyph->SetInputData(src);
+//		glyph->SetVectorModeToUseNormal();
+//		glyph->SetScaleModeToScaleByVector();
+//		glyph->SetScaleFactor(size);
+//		glyph->OrientOn();
+//		glyph->Update();
+//	}
+//} // namespace
+
+
+
+//艺术样条放样（有意思）
+
+//#include <vtkActor.h>
+//#include <vtkCardinalSpline.h>
+//#include <vtkCellArray.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkMath.h>
+//#include <vtkMinimalStandardRandomSequence.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPoints.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkSphereSource.h>
+//#include <vtkSplineFilter.h>
+//#include <vtkXMLPolyDataReader.h>
+//
+//int main(int argc, char* argv[])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	auto polyData = vtkSmartPointer<vtkPolyData>::New();
+//	if (argc > 1)
+//	{
+//		vtkNew<vtkXMLPolyDataReader> reader;
+//		reader->SetFileName(argv[1]);
+//		reader->Update();
+//		polyData = reader->GetOutput();
+//	}
+//	else
+//	{
+//		unsigned int numberOfPoints = 100;
+//		vtkNew<vtkPoints> points;
+//		vtkNew<vtkMinimalStandardRandomSequence> randomSequence;
+//		randomSequence->SetSeed(8775070);
+//		for (unsigned int i = 0; i < numberOfPoints; ++i)
+//		{
+//			double x, y, z;
+//			// random position and radius
+//			x = randomSequence->GetRangeValue(-1.0, 1.0);
+//			randomSequence->Next();
+//			y = randomSequence->GetRangeValue(-1.0, 1.0);
+//			randomSequence->Next();
+//			z = randomSequence->GetRangeValue(-1.0, 1.0);
+//			randomSequence->Next();
+//			points->InsertNextPoint(x, y, z);
+//		}
+//		vtkNew<vtkCellArray> lines;
+//		lines->InsertNextCell(numberOfPoints);
+//		for (unsigned int i = 0; i < numberOfPoints; ++i)
+//		{
+//			lines->InsertCellPoint(i);
+//		}
+//		polyData->SetPoints(points);
+//		polyData->SetLines(lines);
+//	}
+//
+//	vtkNew<vtkCardinalSpline> spline;
+//	spline->SetLeftConstraint(2);
+//	spline->SetLeftValue(0.0);
+//	spline->SetRightConstraint(2);
+//	spline->SetRightValue(0.0);
+//
+//	vtkNew<vtkSplineFilter> splineFilter;
+//	splineFilter->SetInputData(polyData);
+//	splineFilter->SetNumberOfSubdivisions(polyData->GetNumberOfPoints() * 10);
+//	splineFilter->SetSpline(spline);
+//
+//	vtkNew<vtkPolyDataMapper> splineMapper;
+//	splineMapper->SetInputConnection(splineFilter->GetOutputPort());
+//
+//	vtkNew<vtkActor> splineActor;
+//	splineActor->SetMapper(splineMapper);
+//
+//	vtkNew<vtkSphereSource> originalNodes;
+//	originalNodes->SetRadius(.04);
+//	originalNodes->SetPhiResolution(10);
+//	originalNodes->SetThetaResolution(10);
+//
+//	vtkNew<vtkGlyph3D> glyphOriginal;
+//	glyphOriginal->SetInputData(polyData);
+//	glyphOriginal->SetSourceConnection(originalNodes->GetOutputPort());
+//
+//	vtkNew<vtkSphereSource> newNodes;
+//	newNodes->SetRadius(.02);
+//	newNodes->SetPhiResolution(10);
+//	newNodes->SetThetaResolution(10);
+//
+//	vtkNew<vtkGlyph3D> glyphNew;
+//	glyphNew->SetInputConnection(splineFilter->GetOutputPort());
+//	glyphNew->SetSourceConnection(newNodes->GetOutputPort());
+//
+//	vtkNew<vtkPolyDataMapper> originalMapper;
+//	originalMapper->SetInputConnection(glyphOriginal->GetOutputPort());
+//
+//	vtkNew<vtkActor> originalActor;
+//	originalActor->SetMapper(originalMapper);
+//	originalActor->GetProperty()->SetColor(
+//		colors->GetColor3d("Banana").GetData());
+//	originalActor->GetProperty()->SetOpacity(.6);
+//
+//	vtkNew<vtkPolyDataMapper> newMapper;
+//	newMapper->SetInputConnection(glyphNew->GetOutputPort());
+//
+//	vtkNew<vtkActor> newActor;
+//	newActor->SetMapper(newMapper);
+//	newActor->GetProperty()->SetColor(colors->GetColor3d("Tomato").GetData());
+//
+//	// A renderer and render window
+//	vtkNew<vtkRenderer> renderer;
+//	renderer->SetBackground(colors->GetColor3d("SteelBlue").GetData());
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("ResamplePolyLine");
+//
+//	// An interactor
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	// Add the actors to the scene
+//	renderer->AddActor(originalActor);
+//	renderer->AddActor(newActor);
+//	renderer->AddActor(splineActor);
+//
+//	renderWindow->Render();
+//
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//VisualizeDirectedGraph 首尾相接形成三角形的箭头
+
+//#include <vtkActor.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkGraphLayout.h>
+//#include <vtkGraphLayoutView.h>
+//#include <vtkGraphToPolyData.h>
+//#include <vtkMutableDirectedGraph.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSimple2DLayoutStrategy.h>
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkMutableDirectedGraph> g;
+//
+//	vtkIdType v1 = g->AddVertex();
+//	vtkIdType v2 = g->AddVertex();
+//	vtkIdType v3 = g->AddVertex();
+//
+//	g->AddEdge(v1, v2);
+//	g->AddEdge(v2, v3);
+//	g->AddEdge(v3, v1);
+//
+//	// Do layout manually before handing graph to the view.
+//	// This allows us to know the positions of edge arrows.
+//	vtkNew<vtkGraphLayoutView> graphLayoutView;
+//
+//	vtkNew<vtkGraphLayout> layout;
+//	vtkNew<vtkSimple2DLayoutStrategy> strategy;
+//	layout->SetInputData(g);
+//	layout->SetLayoutStrategy(strategy);
+//
+//	// Tell the view to use the vertex layout we provide
+//	graphLayoutView->SetLayoutStrategyToPassThrough();
+//	// The arrows will be positioned on a straight line between two
+//	// vertices so tell the view not to draw arcs for parallel edges
+//	graphLayoutView->SetEdgeLayoutStrategyToPassThrough();
+//
+//	// Add the graph to the view. This will render vertices and edges,
+//	// but not edge arrows.
+//	graphLayoutView->AddRepresentationFromInputConnection(
+//		layout->GetOutputPort());
+//
+//	// Manually create an actor containing the glyphed arrows.
+//	vtkNew<vtkGraphToPolyData> graphToPoly;
+//	graphToPoly->SetInputConnection(layout->GetOutputPort());
+//	graphToPoly->EdgeGlyphOutputOn();
+//
+//	// Set the position (0: edge start, 1: edge end) where
+//	// the edge arrows should go.
+//	graphToPoly->SetEdgeGlyphPosition(0.98);
+//
+//	// Make a simple edge arrow for glyphing.
+//	vtkNew<vtkGlyphSource2D> arrowSource;
+//	arrowSource->SetGlyphTypeToEdgeArrow();
+//	arrowSource->SetScale(0.1);
+//	arrowSource->Update();
+//
+//	// Use Glyph3D to repeat the glyph on all edges.
+//	vtkNew<vtkGlyph3D> arrowGlyph;
+//	arrowGlyph->SetInputConnection(0, graphToPoly->GetOutputPort(1));
+//	arrowGlyph->SetInputConnection(1, arrowSource->GetOutputPort());
+//
+//	// Add the edge arrow actor to the view.
+//	vtkNew<vtkPolyDataMapper> arrowMapper;
+//	arrowMapper->SetInputConnection(arrowGlyph->GetOutputPort());
+//	vtkNew<vtkActor> arrowActor;
+//	arrowActor->SetMapper(arrowMapper);
+//	graphLayoutView->GetRenderer()->AddActor(arrowActor);
+//
+//	graphLayoutView->GetRenderer()->SetBackground(
+//		colors->GetColor3d("SaddleBrown").GetData());
+//	graphLayoutView->GetRenderer()->SetBackground2(
+//		colors->GetColor3d("Wheat").GetData());
+//	graphLayoutView->GetRenderWindow()->SetWindowName("VisualizeDirectedGraph");
+//	graphLayoutView->ResetCamera();
+//	graphLayoutView->Render();
+//	graphLayoutView->GetInteractor()->Start();
 //
 //	return EXIT_SUCCESS;
 //}

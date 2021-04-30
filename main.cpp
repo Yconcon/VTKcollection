@@ -4,6 +4,9 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 
 //延时函数
 #include <ctime> 
+#include<iostream>
+using namespace std;
+
 
 void   Delay(int   time)//time*1000为秒数 
 {
@@ -6876,171 +6879,175 @@ int main(int, char* [])
 
 //箭头
 
-#include <vtkAppendFilter.h>
-#include <vtkSphereSource.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkUnstructuredGridReader.h>
-#include <vtkXMLUnstructuredGridReader.h>
-
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkDataSetMapper.h>
-#include <vtkNamedColors.h>
-#include <vtkNew.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#include <vtkLookupTable.h>
-#include <algorithm>
-#include <array>
-#include <string>
-#include <vtkScalarBarActor.h>
-#include <vtkAxesActor.h>
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkDataSetAttributes.h>
-#include <vtkPolyData.h>
-#include <vtkPointData.h>
-#include <vtkCellData.h>
-#include <vtkArrowSource.h>
-#include <vtkGlyph3D.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-
-namespace {
-	vtkSmartPointer<vtkUnstructuredGrid>
-		ReadUnstructuredGrid(std::string const& fileName);
-}
-
-int main(int argc, char* argv[])
-{
-	// Vis Pipeline
-	vtkNew<vtkNamedColors> colors;
-	vtkNew<vtkRenderer> renderer;
-	vtkNew<vtkRenderWindow> renderWindow;
-
-	renderWindow->SetSize(640, 480);
-	renderWindow->AddRenderer(renderer);
-
-	vtkNew<vtkInteractorStyleTrackballCamera> style;
-
-	vtkNew<vtkRenderWindowInteractor> interactor;
-
-	interactor->SetInteractorStyle(style);
-	interactor->SetRenderWindow(renderWindow);
-
-	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
-	renderer->UseHiddenLineRemovalOn();
-
-	vtkNew<vtkUnstructuredGridReader> reader;
-	reader->ReadAllScalarsOn();//获取所有的标量数据
-	reader->ReadAllVectorsOn();
-	reader->ReadAllNormalsOn();
-	reader->ReadAllTensorsOn();
-	reader->ReadAllColorScalarsOn();
-	reader->ReadAllTCoordsOn();
-	reader->ReadAllFieldsOn();
-	
-
-	reader->SetFileName("1.vtk");
-	reader->GetOutput()->Register(reader);
-	reader->Update();
-
-	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
-	cout << nNumScalar << endl;
-
-
-	//std::cout << "Loading: " << argv[1] << std::endl;
-	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
-	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
-		vtkSmartPointer<vtkPolyData>::New();
-	auto unstructuredGrid = reader->GetOutput();
-	cout << reader->GetScalarsNameInFile(0) << endl;
-	cout << reader->GetScalarsNameInFile(1) << endl;
-	cout << reader->GetVectorsNameInFile(0) << endl;
-	
-	vtkNew<vtkArrowSource> arrow;
-	vtkNew<vtkGlyph3D> glyphs;
-	glyphs->SetSourceConnection(arrow->GetOutputPort());
-	glyphs->SetInputConnection(reader->GetOutputPort());
-	glyphs->ScalingOn();
-	glyphs->SetScaleModeToScaleByVector();
-	glyphs->SetScaleFactor(0.25);
-	glyphs->OrientOn();
-	glyphs->ClampingOff();
-	glyphs->SetVectorModeToUseVector();
-	glyphs->SetIndexModeToOff();
-
-
-
-	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
-	//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
-
-	vtkNew<vtkLookupTable> lut1;
-	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
-
-
-	vtkNew<vtkPolyDataMapper> glyphMapper;
-	glyphMapper->SetInputConnection(glyphs->GetOutputPort());
-	//glyphMapper->ScalarVisibilityOff();
-	glyphMapper->SetScalarRange(unstructuredGrid->GetScalarRange());
-	glyphMapper->SetLookupTable(lut1);
-	glyphMapper->SetColorModeToMapScalars();
-
-	// Visualize
-	vtkNew<vtkDataSetMapper> mapper;
-	//mapper->ScalarVisibilityOff();
-	mapper->SetInputData(unstructuredGrid);
-	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
-	mapper->SetLookupTable(lut1);
-	mapper->SetColorModeToMapScalars();
-
-	cout << unstructuredGrid->GetScalarRange()[0] << endl;
-	cout << unstructuredGrid->GetScalarRange()[1] << endl;
-
-	vtkNew<vtkScalarBarActor> scalarbar;
-	scalarbar->SetLookupTable(glyphMapper->GetLookupTable());
-	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
-	scalarbar->SetNumberOfLabels(5);
-	renderer->AddActor2D(scalarbar);
-
-	vtkNew<vtkAxesActor> axes;
-
-	vtkNew<vtkOrientationMarkerWidget> widget;
-	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
-	colors->GetColor("Carrot", rgba);
-	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
-	widget->SetOrientationMarker(axes);
-	widget->SetInteractor(interactor);
-	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
-	widget->SetEnabled(1);
-	widget->InteractiveOn();
-
-
-	vtkNew<vtkActor> glyphActor;
-	glyphActor->SetMapper(glyphMapper);
-	glyphActor->GetProperty()->EdgeVisibilityOn();//显示网格
-	glyphActor->GetProperty()->SetOpacity(1);
-
-	vtkNew<vtkActor> actor;
-	actor->SetMapper(mapper);
-	actor->GetProperty()->EdgeVisibilityOn();//显示网格
-	actor->GetProperty()->SetOpacity(1);
-
-	renderer->AddActor(glyphActor);
-	renderer->AddActor(actor);
-
-	renderer->GetActiveCamera()->Azimuth(45);
-	renderer->GetActiveCamera()->Elevation(45);
-	renderer->ResetCamera();
-	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
-	renderWindow->Render();
-	interactor->Start();
-
-	return EXIT_SUCCESS;
-}
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkPolyData.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkLookupTable.h>
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <vtkScalarBarActor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkDataSetAttributes.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointData.h>
+//#include <vtkCellData.h>
+//#include <vtkArrowSource.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkInteractorStyleTrackballCamera> style;
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//
+//	interactor->SetInteractorStyle(style);
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	renderer->SetBackground(colors->GetColor3d("MistyRose").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//vtkNew<vtkXMLUnstructuredGridReader>reader;
+//	reader->ReadAllScalarsOn();//获取所有的标量数据
+//	reader->ReadAllVectorsOn();
+//	reader->ReadAllNormalsOn();
+//	reader->ReadAllTensorsOn();
+//	reader->ReadAllColorScalarsOn();
+//	reader->ReadAllTCoordsOn();
+//	reader->ReadAllFieldsOn();
+//	
+//
+//	reader->SetFileName("1.vtk");
+//	reader->GetOutput()->Register(reader);
+//	reader->Update();
+//
+//	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
+//	cout << nNumScalar << endl;
+//
+//
+//	//std::cout << "Loading: " << argv[1] << std::endl;
+//	//auto unstructuredGrid = ReadUnstructuredGrid(std::string(argv[1]));
+//	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
+//		vtkSmartPointer<vtkPolyData>::New();
+//	auto unstructuredGrid = reader->GetOutput();
+//	cout << reader->GetScalarsNameInFile(0) << endl;
+//	cout << reader->GetScalarsNameInFile(1) << endl;
+//	//cout << reader->GetScalarsNameInFile(2) << endl;
+//	cout << reader->GetVectorsNameInFile(0) << endl;
+//	
+//	vtkNew<vtkArrowSource> arrow;
+//	vtkNew<vtkGlyph3D> glyphs;
+//	glyphs->SetSourceConnection(arrow->GetOutputPort());
+//	glyphs->SetInputConnection(reader->GetOutputPort());
+//	glyphs->ScalingOn();
+//	glyphs->SetScaleModeToScaleByVector();
+//	glyphs->SetScaleFactor(0.25);
+//	glyphs->OrientOn();
+//	glyphs->ClampingOff();
+//	glyphs->SetVectorModeToUseVector();
+//	glyphs->SetIndexModeToOff();
+//
+//
+//
+//	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
+//	//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//
+//
+//	vtkNew<vtkPolyDataMapper> glyphMapper;
+//	glyphMapper->SetInputConnection(glyphs->GetOutputPort());
+//	//glyphMapper->ScalarVisibilityOff();
+//	glyphMapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//	glyphMapper->SetLookupTable(lut1);
+//	glyphMapper->SetColorModeToMapScalars();
+//
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> mapper;
+//	//mapper->ScalarVisibilityOff();
+//	mapper->SetInputData(unstructuredGrid);
+//	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//
+//	cout << unstructuredGrid->GetScalarRange()[0] << endl;
+//	cout << unstructuredGrid->GetScalarRange()[1] << endl;
+//
+//	vtkNew<vtkScalarBarActor> scalarbar;
+//	scalarbar->SetLookupTable(glyphMapper->GetLookupTable());
+//	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+//	scalarbar->SetNumberOfLabels(5);
+//	renderer->AddActor2D(scalarbar);
+//
+//	vtkNew<vtkAxesActor> axes;
+//
+//	vtkNew<vtkOrientationMarkerWidget> widget;
+//	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+//	colors->GetColor("Carrot", rgba);
+//	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+//	widget->SetOrientationMarker(axes);
+//	widget->SetInteractor(interactor);
+//	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+//	widget->SetEnabled(1);
+//	widget->InteractiveOn();
+//
+//
+//	vtkNew<vtkActor> glyphActor;
+//	glyphActor->SetMapper(glyphMapper);
+//	glyphActor->GetProperty()->EdgeVisibilityOn();//显示网格
+//	glyphActor->GetProperty()->SetOpacity(1);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->EdgeVisibilityOn();//显示网格
+//	actor->GetProperty()->SetOpacity(1);
+//
+//	renderer->AddActor(glyphActor);
+//	renderer->AddActor(actor);
+//
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
 
 
@@ -7386,3 +7393,304 @@ int main(int argc, char* argv[])
 //
 //	return EXIT_SUCCESS;
 //}
+
+
+
+//ljj计算结果组合
+
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkLookupTable.h>
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <vtkScalarBarActor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkDataSetAttributes.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointData.h>
+//#include <vtkCellData.h>
+//#include <vtkSphereSource.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkInteractorStyleTrackball.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vector<vtkSmartPointer<vtkActor>>actors;
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	reader->ReadAllScalarsOn();//获取所有的标量数据
+//	reader->ReadAllVectorsOn();
+//	reader->ReadAllNormalsOn();
+//	reader->ReadAllTensorsOn();
+//	reader->ReadAllColorScalarsOn();
+//	reader->ReadAllTCoordsOn();
+//	reader->ReadAllFieldsOn();
+//
+//	for (int i = 1; i <= 8; i++)
+//	{
+//		string id = to_string(i);
+//		string fileName = id + ".vtk";
+//
+//		reader->SetFileName(fileName.c_str());
+//		reader->GetOutput()->Register(reader);
+//		reader->Update();
+//
+//		auto unstructuredGrid = reader->GetOutput();
+//		//vtkNew<vtkUnstructuredGrid>unstructuredGrid;
+//
+//		//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//
+//		vtkNew<vtkLookupTable> lut1;
+//		lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//		// Visualize
+//		vtkNew<vtkDataSetMapper> mapper;
+//		mapper->SetInputData(reader->GetOutput());
+//		//mapper->ScalarVisibilityOff();
+//		mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//		mapper->SetLookupTable(lut1);
+//		mapper->SetColorModeToMapScalars();
+//
+//		vtkNew<vtkScalarBarActor> scalarbar;
+//		scalarbar->SetLookupTable(mapper->GetLookupTable());
+//		//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+//		scalarbar->SetNumberOfLabels(5);
+//		renderer->AddActor2D(scalarbar);
+//
+//		vtkNew<vtkActor> actor;
+//		actor->SetMapper(mapper);
+//		actor->GetProperty()->EdgeVisibilityOn();//显示网格
+//		//actor->SetBackfaceProperty(backProp);
+//		//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//		//actor->GetProperty()->SetSpecular(.3);
+//		//actor->GetProperty()->SetSpecularPower(30);
+//		//actor->GetProperty()->EdgeVisibilityOn();
+//		actor->GetProperty()->SetOpacity(1);
+//
+//		actors.push_back(actor);
+//	}
+//
+//	for (unsigned int i = 0; i < actors.size(); i++)
+//	{
+//		renderer->AddActor(actors[i]);
+//	}
+//
+//	//vtkNew<vtkAxesActor> axes;
+//	//vtkNew<vtkOrientationMarkerWidget> widget;
+//	//double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+//	//colors->GetColor("Carrot", rgba);
+//	//widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+//	//widget->SetOrientationMarker(axes);
+//	//widget->SetInteractor(interactor);
+//	//widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+//	//widget->SetEnabled(1);
+//	//widget->InteractiveOn();
+//
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//
+//	vtkNew<vtkInteractorStyleTrackballCamera> style;
+//	interactor->SetInteractorStyle(style);
+//
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+//手动创建8个actor
+
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkLookupTable.h>
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <vtkScalarBarActor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkDataSetAttributes.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointData.h>
+//#include <vtkCellData.h>
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vector<vtkSmartPointer<vtkActor>>actors;
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	reader->ReadAllScalarsOn();//获取所有的标量数据
+//	reader->ReadAllVectorsOn();
+//	reader->ReadAllNormalsOn();
+//	reader->ReadAllTensorsOn();
+//	reader->ReadAllColorScalarsOn();
+//	reader->ReadAllTCoordsOn();
+//	reader->ReadAllFieldsOn();
+//
+//
+//	reader->SetFileName("1.vtk");
+//	reader->GetOutput()->Register(reader);
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> mapper;
+//	mapper->SetInputData(unstructuredGrid);
+//	//mapper->ScalarVisibilityOff();
+//	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//
+//	vtkNew<vtkScalarBarActor> scalarbar;
+//	scalarbar->SetLookupTable(mapper->GetLookupTable());
+//	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+//	scalarbar->SetNumberOfLabels(5);
+//	renderer->AddActor2D(scalarbar);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->EdgeVisibilityOn();//显示网格
+//	actor->GetProperty()->SetOpacity(1);
+//
+//	renderer->AddActor(actor);
+//
+//	//ssssssssssssssssssssssss
+//	vtkNew<vtkUnstructuredGridReader>reader2;
+//	reader2->SetFileName("2.vtk");
+//	reader2->GetOutput()->Register(reader);
+//	reader2->Update();
+//
+//	auto unstructuredGrid2 = reader2->GetOutput();
+//
+//	reader2->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//
+//	vtkNew<vtkDataSetMapper>mapper2;
+//	mapper2->SetInputData(unstructuredGrid2);
+//	//mapper->ScalarVisibilityOff();
+//	mapper2->SetScalarRange(unstructuredGrid2->GetScalarRange());
+//	mapper2->SetLookupTable(lut1);
+//	mapper2->SetColorModeToMapScalars();
+//
+//	vtkNew<vtkActor> actor2;
+//	actor2->SetMapper(mapper2);
+//	actor2->GetProperty()->EdgeVisibilityOn();//显示网格
+//	actor2->GetProperty()->SetOpacity(1);
+//
+//	renderer->AddActor(actor2);
+//
+//	//renderer->GetActiveCamera()->Azimuth(45);
+//	//renderer->GetActiveCamera()->Elevation(45);
+//	//renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+//vtu转换为vtk文件格式
+
+#include <vtkSmartPointer.h>
+#include <vtkPolyData.h>
+#include <vtkXMLPolyDataReader.h>
+#include <vtkPLYWriter.h>
+#include <vtkXMLUnstructuredGridReader.h>
+#include <vtkUnstructuredGridWriter.h>
+
+int main(int argc, char* argv[])
+{
+	std::string inputFileName = "vtuReaderTest.vtu";
+	std::string outputFileName = "vtkWriterTest.vtk";
+
+	vtkSmartPointer<vtkXMLUnstructuredGridReader> reader = vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+	reader->SetFileName(inputFileName.c_str());
+	reader->Update();
+
+	vtkSmartPointer<vtkUnstructuredGridWriter> writer = vtkSmartPointer<vtkUnstructuredGridWriter>::New();
+	writer->SetFileName(outputFileName.c_str());
+	writer->SetInputConnection(reader->GetOutputPort());
+	writer->Update();
+
+	return 0;
+}

@@ -5,6 +5,7 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 //延时函数
 #include <ctime> 
 #include<iostream>
+#include<cmath>
 using namespace std;
 
 
@@ -1451,7 +1452,8 @@ int main(int argc, char* argv[]) {
 //	renderer->UseHiddenLineRemovalOn();
 //
 //	vtkNew<vtkUnstructuredGridReader> reader;
-//	reader->SetFileName("mesh-paraview.vtk");
+//	//reader->SetFileName("mesh-paraview.vtk");
+//	reader->SetFileName("1.vtk");
 //	reader->Update();
 //
 //	//std::cout << "Loading: " << argv[1] << std::endl;
@@ -1475,6 +1477,8 @@ int main(int argc, char* argv[]) {
 //	actor->GetProperty()->SetSpecular(.3);
 //	actor->GetProperty()->SetSpecularPower(30);
 //	actor->GetProperty()->EdgeVisibilityOn();
+//	actor->GetProperty()->SetRepresentationToWireframe();//显示外网格
+//
 //	renderer->AddActor(actor);
 //	renderer->GetActiveCamera()->Azimuth(45);
 //	renderer->GetActiveCamera()->Elevation(45);
@@ -2883,6 +2887,7 @@ int main(int argc, char* argv[])
 //#include <vtkCellData.h>
 //#include <vtkInteractorStyleTrackballCamera.h>
 //
+//
 //namespace {
 //	vtkSmartPointer<vtkUnstructuredGrid>
 //		ReadUnstructuredGrid(std::string const& fileName);
@@ -2904,7 +2909,7 @@ int main(int argc, char* argv[])
 //	interactor->SetInteractorStyle(style);
 //	interactor->SetRenderWindow(renderWindow);
 //
-//	renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->SetBackground(colors->GetColor3d("White").GetData());
 //	renderer->UseHiddenLineRemovalOn();
 //
 //	vtkNew<vtkUnstructuredGridReader> reader;
@@ -2916,9 +2921,10 @@ int main(int argc, char* argv[])
 //	reader->ReadAllTCoordsOn();
 //	reader->ReadAllFieldsOn();
 //
-//	reader->SetFileName("2.vtk");
+//	reader->SetFileName("Test04.vtk");
 //	reader->GetOutput()->Register(reader);
 //	reader->Update();
+//
 //
 //	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
 //	cout << nNumScalar << endl;
@@ -2937,12 +2943,14 @@ int main(int argc, char* argv[])
 //		//cout << reader->GetScalarsNameInFile(3) << endl;
 //		//cout << reader->GetScalarsNameInFile(4) << endl;
 //	}
-//	
-//	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(1));//设置标量名称，即渲染哪个标量
-//	reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(0));
+//	int index = 0;
+//
+//	//reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(index));//设置标量名称，即渲染哪个标量
+//	reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(index));
+//
 //
 //	vtkNew<vtkLookupTable> lut1;
-//	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//	lut1->SetHueRange(.667, 0);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
 //	// Visualize
 //	vtkNew<vtkDataSetMapper> mapper;
 //	mapper->SetInputData(unstructuredGrid);
@@ -2950,6 +2958,8 @@ int main(int argc, char* argv[])
 //	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
 //	mapper->SetLookupTable(lut1);
 //	mapper->SetColorModeToMapScalars();
+//	//mapper->SetScalarModeToUseCellData();
+//	mapper->SetScalarModeToDefault();
 //
 //	cout << unstructuredGrid->GetScalarRange()[0] << endl;
 //	cout << unstructuredGrid->GetScalarRange()[1] << endl;
@@ -2958,6 +2968,7 @@ int main(int argc, char* argv[])
 //	scalarbar->SetLookupTable(mapper->GetLookupTable());
 //	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
 //	scalarbar->SetNumberOfLabels(5);
+//	scalarbar->SetTitle(reader->GetScalarsNameInFile(index));
 //	renderer->AddActor2D(scalarbar);
 //
 //
@@ -2977,12 +2988,10 @@ int main(int argc, char* argv[])
 //	vtkNew<vtkActor> actor;
 //	actor->SetMapper(mapper);
 //	actor->GetProperty()->EdgeVisibilityOn();//显示网格
-//	//actor->SetBackfaceProperty(backProp);
-//	//actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
 //	//actor->GetProperty()->SetSpecular(.3);
 //	//actor->GetProperty()->SetSpecularPower(30);
 //	//actor->GetProperty()->EdgeVisibilityOn();
-//	actor->GetProperty()->SetOpacity(1);
+//	actor->GetProperty()->SetOpacity(.5);
 //
 //	renderer->AddActor(actor);
 //	renderer->GetActiveCamera()->Azimuth(45);
@@ -4660,7 +4669,7 @@ int main(int, char* [])
 //}
 
 
-//剖切，切块
+//剖切，切块。改为了提取表面一层进行渲染，缩短渲染时间
 
 //#include <vtkSmartPointer.h>
 //
@@ -4672,22 +4681,24 @@ int main(int, char* [])
 //#include <vtkCommand.h>
 //#include <vtkImplicitPlaneWidget2.h>
 //#include <vtkImplicitPlaneRepresentation.h>
-//#include<vtkPolyDataMapper.h>
+//#include <vtkPolyDataMapper.h>
 //#include <vtkPolyDataMapper.h>
 //#include <vtkProperty.h>
 //#include <vtkActor.h>
 //#include <vtkRenderWindow.h>
 //#include <vtkRenderer.h>
 //#include <vtkRenderWindowInteractor.h>
-//#include<vtkUnstructuredGrid.h>
-//#include<vtkUnstructuredGridReader.h>
-//#include<vtkXMLUnstructuredGridReader.h>
-//#include<vtkDataSetSurfaceFilter.h>
-//#include<vtkDataSetMapper.h>
-//#include<vtkNew.h>
-//#include<vtkLookupTable.h>
-//
-//#include<vtkClipDataSet.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNew.h>
+//#include <vtkLookupTable.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkClipDataSet.h>
+//#include <vtkCutter.h>
+//#include <vtkMapper.h>
 //
 //// Callback for the interaction
 //// This does the actual work: updates the vtkPlane implicit function.
@@ -4716,19 +4727,118 @@ int main(int, char* [])
 //int main(int argc, char* argv[])
 //{
 //
-//	//vtkSmartPointer<vtkUnstructuredGridReader> reader =
-//	//	vtkSmartPointer<vtkUnstructuredGridReader>::New();
-//	vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
-//		vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
-//	reader->SetFileName("vtuTest.vtu");
-//	reader->Update();
-//	
+//	vtkSmartPointer<vtkRenderer> renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	vtkSmartPointer<vtkRenderWindow> renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->AddRenderer(renderer);
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
 //
+//	vtkSmartPointer<vtkUnstructuredGridReader> reader =
+//		vtkSmartPointer<vtkUnstructuredGridReader>::New();
+//	//vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
+//	//	vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+//	reader->SetFileName("1.vtk");
+//	reader->Update();
+//
+//	auto unstructuredgrid = reader->GetOutput();
+//
+//	vtkSmartPointer<vtkDataSetMapper>mapper0 =
+//		vtkSmartPointer<vtkDataSetMapper>::New();
+//	mapper0->SetInputData(unstructuredgrid);
+//	//mapper->SetScalarRange(this->getScalarRange(scalarIte));
+//
+//	//零件actor
+//	vtkSmartPointer<vtkActor>opacityActor =
+//		vtkSmartPointer<vtkActor>::New();
+//	opacityActor->SetMapper(mapper0);
+//	opacityActor->GetProperty()->SetOpacity(0.1);
+//	// 添加renderer的元素
+//	renderer->AddActor(opacityActor);
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	lut1->SetHueRange(0.4, 0.9);
+//
+//	//vtkNew<vtkMapper>sourceMapper;
+//	//vtkSmartPointer<vtkMapper>sourceMapper =
+//	//	vtkSmartPointer<vtkMapper>::New();
+//	vtkMapper* sourceMapper = renderer->GetActors()->GetLastActor()->GetMapper();
+//
+//	//抽出表面
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> ds_filter = vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	ds_filter->SetInputData(sourceMapper->GetInput());
+//	ds_filter->Update();
+//
+//	//polydata数据
+//	vtkSmartPointer<vtkPolyData> polyData = ds_filter->GetOutput();
+//	//剖切平面
+//	vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
+//	plane->SetOrigin(reader->GetOutput()->GetCenter());
+//
+//	//clipper,出去平面剩下的部分，很显然由于ds_filter把表面提取出来了，因此这个只是一个无盖的壳
+//	vtkSmartPointer<vtkClipPolyData> clipperData = vtkSmartPointer<vtkClipPolyData>::New();
+//	clipperData->SetInputData(polyData);
+//	clipperData->SetClipFunction(plane);
+//	clipperData->Modified();
+//	//cutter,只有一个平面
+//	vtkSmartPointer<vtkCutter> cutter = vtkSmartPointer<vtkCutter>::New();
+//	cutter->SetInputData(sourceMapper->GetInput());
+//	cutter->SetCutFunction(plane);
+//	cutter->Modified();
+//	//clip mapper
+//	vtkSmartPointer<vtkPolyDataMapper> clip_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//	clip_mapper->SetLookupTable(lut1);
+//	clip_mapper->SetScalarRange(polyData->GetScalarRange());
+//	clip_mapper->SetInputConnection(clipperData->GetOutputPort());
+//	//cut mapper
+//	vtkSmartPointer<vtkPolyDataMapper> cut_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//	cut_mapper->SetLookupTable(lut1);
+//	cut_mapper->SetScalarRange(sourceMapper->GetInput()->GetScalarRange());
+//	cut_mapper->SetInputConnection(cutter->GetOutputPort());
+//	//actor
+//	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(clip_mapper);
+//	vtkSmartPointer<vtkActor> cut_actor = vtkSmartPointer<vtkActor>::New();
+//	cut_actor->SetMapper(cut_mapper);
+//
+//	vtkSmartPointer<vtkIPWCallback> myCallback =
+//		vtkSmartPointer<vtkIPWCallback>::New();
+//	myCallback->Plane = plane;
+//
+//	//添加actor
+//
+//	renderer->AddActor(actor);
+//	renderer->AddActor(cut_actor);
+//
+//	vtkSmartPointer<vtkImplicitPlaneRepresentation> rep =
+//		vtkSmartPointer<vtkImplicitPlaneRepresentation>::New();
+//	rep->SetPlaceFactor(1.25); // This must be set prior to placing the widget
+//	rep->PlaceWidget(actor->GetBounds());
+//	rep->SetNormal(plane->GetNormal());
+//	rep->SetOrigin(plane->GetOrigin());
+//	rep->OutlineTranslationOff();//锁定最外层边框
+//
+//	
+//	vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget =
+//		vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
+//	planeWidget->SetInteractor(renderWindowInteractor);
+//	planeWidget->SetRepresentation(rep);
+//	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
+//
+//
+//	planeWidget->On();
+//	renderWindowInteractor->Initialize();
+//	renderWindow->Render();
+//
+//
+//	/*
 //	// Setup a visualization pipeline
 //	vtkSmartPointer<vtkPlane> plane =
 //		vtkSmartPointer<vtkPlane>::New();
 //	plane->SetOrigin(reader->GetOutput()->GetCenter());
-//	
+//
 //
 //	auto clipper = vtkSmartPointer<vtkClipDataSet>::New();
 //
@@ -4797,6 +4907,7 @@ int main(int, char* [])
 //
 //	// Begin mouse interaction
 //	renderWindowInteractor->Start();
+//	*/
 //
 //	return EXIT_SUCCESS;
 //}
@@ -6884,218 +6995,232 @@ int main(int, char* [])
 //}
 
 
-//箭头
+//箭头，cellDataToPoint，单元数据转成节点数据，选择标量显示
 
-#include <vtkAppendFilter.h>
-#include <vtkSphereSource.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkUnstructuredGridReader.h>
-#include <vtkXMLUnstructuredGridReader.h>
-#include <vtkPolyData.h>
-
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkDataSetMapper.h>
-#include <vtkNamedColors.h>
-#include <vtkNew.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#include <vtkLookupTable.h>
-#include <algorithm>
-#include <array>
-#include <string>
-#include <vtkScalarBarActor.h>
-#include <vtkAxesActor.h>
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkDataSetAttributes.h>
-#include <vtkPolyData.h>
-#include <vtkPointData.h>
-#include <vtkCellData.h>
-#include <vtkArrowSource.h>
-#include <vtkGlyph3D.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-#include <vtkGlyphSource2D.h>
-#include <vtkCellDataToPointData.h>
-#include <vtkCellData.h>
-#include <vtkMaskPoints.h>
-
-namespace {
-	vtkSmartPointer<vtkUnstructuredGrid>
-		ReadUnstructuredGrid(std::string const& fileName);
-}
-
-int main(int argc, char* argv[])
-{
-	// Vis Pipeline
-	vtkNew<vtkNamedColors> colors;
-	vtkNew<vtkRenderer> renderer;
-	vtkNew<vtkRenderWindow> renderWindow;
-
-
-	renderWindow->SetSize(640, 480);
-	renderWindow->AddRenderer(renderer);
-
-	vtkNew<vtkInteractorStyleTrackballCamera> style;
-
-	vtkNew<vtkRenderWindowInteractor> interactor;
-
-	interactor->SetInteractorStyle(style);
-	interactor->SetRenderWindow(renderWindow);
-
-	renderer->SetBackground(colors->GetColor3d("LightSlateGray").GetData());
-	renderer->UseHiddenLineRemovalOn();
-
-	vtkNew<vtkUnstructuredGridReader> reader;
-	//vtkNew<vtkXMLUnstructuredGridReader>reader;
-	reader->ReadAllScalarsOn();//获取所有的标量数据
-	reader->ReadAllVectorsOn();
-	reader->ReadAllNormalsOn();
-	reader->ReadAllTensorsOn();
-	reader->ReadAllColorScalarsOn();
-	reader->ReadAllTCoordsOn();
-	reader->ReadAllFieldsOn();
-	
-
-	reader->SetFileName("step45.vtk");
-	//reader->GetOutput()->Register(reader);
-	reader->Update();
-
-	vtkNew<vtkCellDataToPointData>cellToPoint;
-	cellToPoint->SetInputData(reader->GetOutput());
-	cellToPoint->Update();
-
-	vtkNew<vtkMaskPoints>mask;
-	mask->SetInputData(cellToPoint->GetOutput());
-	mask->SetMaximumNumberOfPoints(9000);
-	mask->RandomModeOn();
-	mask->Update();
-
-
-	int cellNum = cellToPoint->GetOutput()->GetNumberOfCells();
-	cout << "cells of cellToPoint: " << cellNum << endl;
-	int pointNum = cellToPoint->GetOutput()->GetNumberOfPoints();
-	cout << "points of cellToPoint: " << pointNum<< endl;
-
-	int cellNum2 = reader->GetOutput()->GetNumberOfCells();
-	cout << "cells of reader: " << cellNum2 << endl;
-	int pointNum2 = reader->GetOutput()->GetNumberOfPoints();
-	cout << "points of reader: " << pointNum2 << endl;
-
-	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
-	cout << "Number of scalars is: " << nNumScalar << endl;
-
-	vtkSmartPointer<vtkPolyData> UnstructuredGrid =
-		vtkSmartPointer<vtkPolyData>::New();
-	auto unstructuredGrid = reader->GetOutput();
-	for (int i = 0; i < nNumScalar; i++)
-	{
-		cout << reader->GetScalarsNameInFile(i) << endl;
-	}
-
-	int nNumVector = reader->GetNumberOfVectorsInFile();
-	cout << "Number of Vector is: " << nNumVector << endl;
-	
-	for (int i = 0; i < nNumVector; i++)
-	{
-		cout << reader->GetVectorsNameInFile(i) << endl;
-	}
-
-	//vtkNew<vtkArrowSource> arrow;
-	vtkNew<vtkGlyphSource2D>arrow;
-	arrow->SetGlyphTypeToArrow();
-	arrow->FilledOff();
-	vtkNew<vtkGlyph3D> glyphs;
-	glyphs->SetSourceConnection(arrow->GetOutputPort());
-	//glyphs->SetInputConnection(reader->GetOutputPort());
-	//glyphs->SetInputConnection(cellToPoint->GetOutputPort());
-	glyphs->SetInputConnection(mask->GetOutputPort());
-	glyphs->ScalingOn();
-	glyphs->SetScaleModeToScaleByVector();
-	glyphs->SetScaleFactor(0.005);
-	glyphs->OrientOn();
-	glyphs->ClampingOff();
-	glyphs->SetVectorModeToUseVector();
-	glyphs->SetIndexModeToOff();
-
-
-	reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(2));//设置标量名称，即渲染哪个标量
-	//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(2));
-	//double* cellDataRange = reader->GetOutput()->GetPointData()->GetScalars()->GetRange();
-	//double* cellDataRange = reader->GetOutput()->GetCellData()->GetScalars()->GetRange();
-	//cout << "cell data range is: " << cellDataRange[0] << ' ' << cellDataRange[1] << endl;
-
-	vtkNew<vtkLookupTable> lut1;
-	lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
-
-	vtkNew<vtkPolyDataMapper> glyphMapper;
-	glyphMapper->SetInputConnection(glyphs->GetOutputPort());
-	//glyphMapper->SetInputConnection(cellToPoint->GetOutputPort());
-
-
-	glyphMapper->SetScalarRange(cellToPoint->GetOutput()->GetScalarRange());
-	glyphMapper->SetLookupTable(lut1);
-	glyphMapper->SetColorModeToMapScalars();
-
-	// Visualize
-	vtkNew<vtkDataSetMapper> mapper;
-	//mapper->ScalarVisibilityOff();
-	mapper->SetInputData(unstructuredGrid);
-	mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
-	mapper->SetLookupTable(lut1);
-	//mapper->SetColorModeToMapScalars();
-	mapper->SetScalarModeToUseCellData();
-
-	cout << "unstructuredGrid's scalar range is: " << endl;
-	cout << unstructuredGrid->GetScalarRange()[0] << endl;
-	cout << unstructuredGrid->GetScalarRange()[1] << endl;
-
-	vtkNew<vtkScalarBarActor> scalarbar;
-	scalarbar->SetLookupTable(glyphMapper->GetLookupTable());
-	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
-	scalarbar->SetNumberOfLabels(8);
-	scalarbar->SetMaximumWidthInPixels(100);
-	renderer->AddActor2D(scalarbar);
-
-	vtkNew<vtkAxesActor> axes;
-
-	vtkNew<vtkOrientationMarkerWidget> widget;
-	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
-	colors->GetColor("Carrot", rgba);
-	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
-	widget->SetOrientationMarker(axes);
-	widget->SetInteractor(interactor);
-	widget->SetViewport(0.0, 0.0, 0.4, 0.4);
-	widget->SetEnabled(1);
-	widget->InteractiveOn();
-
-
-	vtkNew<vtkActor> glyphActor;
-	glyphActor->SetMapper(glyphMapper);
-	glyphActor->GetProperty()->EdgeVisibilityOn();//显示网格
-	glyphActor->GetProperty()->SetOpacity(1);
-
-	vtkNew<vtkActor> actor;
-	actor->SetMapper(mapper);
-	actor->GetProperty()->EdgeVisibilityOn();//显示网格
-	actor->GetProperty()->SetOpacity(.5);
-
-	renderer->AddActor(glyphActor);
-	//renderer->AddActor(actor);
-
-	renderer->GetActiveCamera()->Azimuth(45);
-	renderer->GetActiveCamera()->Elevation(45);
-	renderer->ResetCamera();
-	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
-	renderWindow->Render();
-	interactor->Start();
-
-	return EXIT_SUCCESS;
-}
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkPolyData.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkLookupTable.h>
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <vtkScalarBarActor.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkDataSetAttributes.h>
+//#include <vtkPolyData.h>
+//#include <vtkPointData.h>
+//#include <vtkCellData.h>
+//#include <vtkArrowSource.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkCellDataToPointData.h>
+//#include <vtkCellData.h>
+//#include <vtkMaskPoints.h>
+//#include <vtkUnstructuredGrid.h>
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//
+//	vtkNew<vtkNamedColors> colors;
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//
+//
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkInteractorStyleTrackballCamera> style;
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//
+//	interactor->SetInteractorStyle(style);
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	renderer->SetBackground(colors->GetColor3d("LightSlateGray").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//vtkNew<vtkXMLUnstructuredGridReader>reader;
+//	reader->ReadAllScalarsOn();//获取所有的标量数据
+//	reader->ReadAllVectorsOn();
+//	reader->ReadAllNormalsOn();
+//	reader->ReadAllTensorsOn();
+//	reader->ReadAllColorScalarsOn();
+//	reader->ReadAllTCoordsOn();
+//	reader->ReadAllFieldsOn();
+//	
+//
+//	//reader->SetFileName("step22.vtk");
+//	reader->SetFileName("1.vtk");
+//	//reader->GetOutput()->Register(reader);
+//	reader->Update();
+//
+//	vtkNew<vtkCellDataToPointData>cellToPoint;
+//	cellToPoint->SetInputData(reader->GetOutput());
+//	cellToPoint->Update();
+//
+//	vtkNew<vtkMaskPoints>mask;
+//	mask->SetInputData(cellToPoint->GetOutput());
+//	mask->SetMaximumNumberOfPoints(9000);
+//	mask->RandomModeOn();
+//	mask->Update();
+//
+//	int cellNum = cellToPoint->GetOutput()->GetNumberOfCells();
+//	cout << "cells of cellToPoint: " << cellNum << endl;
+//	int pointNum = cellToPoint->GetOutput()->GetNumberOfPoints();
+//	cout << "points of cellToPoint: " << pointNum<< endl;
+//
+//	int cellNum2 = reader->GetOutput()->GetNumberOfCells();
+//	cout << "cells of reader: " << cellNum2 << endl;
+//	int pointNum2 = reader->GetOutput()->GetNumberOfPoints();
+//	cout << "points of reader: " << pointNum2 << endl;
+//
+//	int nNumScalar = reader->GetNumberOfScalarsInFile();//获取标量类型数
+//	cout << "Number of scalars is: " << nNumScalar << endl;
+//
+//	vtkSmartPointer<vtkUnstructuredGrid> UnstructuredGrid =
+//		vtkSmartPointer<vtkUnstructuredGrid>::New();
+//	UnstructuredGrid = reader->GetOutput();
+//	auto unstructuredGrid = reader->GetOutput();
+//	for (int i = 0; i < nNumScalar; i++)
+//	{
+//		cout << reader->GetScalarsNameInFile(i) << endl;
+//	}
+//
+//	int nNumVector = reader->GetNumberOfVectorsInFile();
+//	cout << "Number of Vector is: " << nNumVector << endl;
+//	
+//	for (int i = 0; i < nNumVector; i++)
+//	{
+//		cout << reader->GetVectorsNameInFile(i) << endl;
+//	}
+//
+//	//vtkNew<vtkArrowSource> arrow;
+//	vtkNew<vtkGlyphSource2D>arrow;//二维箭头
+//	arrow->SetGlyphTypeToArrow();
+//	arrow->FilledOff();
+//	
+//	vtkNew<vtkGlyph3D> glyphs;
+//	glyphs->SetSourceConnection(arrow->GetOutputPort());
+//	glyphs->SetInputConnection(mask->GetOutputPort());
+//	//glyphs->SetInputConnection(cellToPoint->GetOutputPort());
+//	glyphs->ScalingOn();
+//	glyphs->SetScaleModeToScaleByVector();
+//	glyphs->SetScaleFactor(0.005);
+//	glyphs->OrientOn();
+//	glyphs->ClampingOff();
+//	glyphs->SetVectorModeToUseVector();
+//	glyphs->SetIndexModeToOff();
+//	//glyphs->SetColorModeToColorByVector();
+//	
+//	int scalarIndex = 4;
+//
+//	reader->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(scalarIndex));//设置标量名称，即渲染哪个标量
+//	cellToPoint->GetOutput()->GetPointData()->SetActiveScalars(reader->GetScalarsNameInFile(scalarIndex));//设置标量名称，即渲染哪个标量
+//	//reader->GetOutput()->GetCellData()->SetActiveScalars(reader->GetScalarsNameInFile(scalarIndex));
+//	reader->Update();
+//
+//	vtkNew<vtkLookupTable> lut1;
+//	//lut1->SetHueRange(0.5, 0.833);// 设定HSV颜色范围，色调H取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°/0.0，绿色为120°/0.34,蓝色为240°/0.67
+//	lut1->SetHueRange(.667, 0);
+//
+//	vtkNew<vtkPolyDataMapper> glyphMapper;
+//	glyphMapper->SetInputConnection(glyphs->GetOutputPort());
+//	//glyphMapper->SetScalarRange(cellToPoint->GetOutput()->GetScalarRange());
+//	glyphMapper->SetLookupTable(lut1);
+//	glyphMapper->SetColorModeToMapScalars();
+//
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> mapper;
+//	//mapper->SetInputData(unstructuredGrid);
+//	mapper->SetInputData(cellToPoint->GetOutput());
+//	//mapper->SetScalarRange(unstructuredGrid->GetScalarRange());
+//	mapper->SetScalarRange(cellToPoint->GetOutput()->GetScalarRange());
+//
+//	mapper->SetLookupTable(lut1);
+//	mapper->SetColorModeToMapScalars();
+//	//mapper->SetScalarModeToUseCellData();//使用网格数据进行映射
+//	mapper->SetScalarModeToDefault();
+//
+//	cout << "unstructuredGrid's scalar range is: " << endl;
+//	cout << unstructuredGrid->GetScalarRange()[0] << endl;
+//	cout << unstructuredGrid->GetScalarRange()[1] << endl;
+//
+//	vtkNew<vtkScalarBarActor> scalarbar;
+//	scalarbar->SetLookupTable(glyphMapper->GetLookupTable());
+//	//scalarbar->SetTitle(curvaturesfilter->GetOutput()->GetPointData()->GetScalars()->GetName());
+//	scalarbar->SetNumberOfLabels(8);
+//	scalarbar->SetMaximumWidthInPixels(100);
+//	//scalarbar->SetTitle("Velocity(m/s)");
+//	scalarbar->SetTitle(reader->GetScalarsNameInFile(scalarIndex));
+//	//scalarbar->SetTitle(reader->GetScalarsName());
+//
+//	renderer->AddActor2D(scalarbar);
+//
+//	vtkNew<vtkAxesActor> axes;
+//
+//	vtkNew<vtkOrientationMarkerWidget> widget;
+//	double rgba[4]{ 0.0, 0.0, 0.0, 0.0 };
+//	colors->GetColor("Carrot", rgba);
+//	widget->SetOutlineColor(rgba[0], rgba[1], rgba[2]);
+//	widget->SetOrientationMarker(axes);
+//	widget->SetInteractor(interactor);
+//	widget->SetViewport(0.0, 0.0, 0.2, 0.2);
+//	widget->SetEnabled(1);
+//	//固定坐标轴位置
+//	//widget->InteractiveOn();
+//	widget->InteractiveOff();
+//	widget->KeyPressActivationOff();
+//	widget->Modified();
+//
+//
+//	vtkNew<vtkActor> glyphActor;
+//	glyphActor->SetMapper(glyphMapper);
+//	glyphActor->GetProperty()->EdgeVisibilityOff();//不显示网格
+//	glyphActor->GetProperty()->SetOpacity(1);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(mapper);
+//	//actor->GetProperty()->EdgeVisibilityOn();//显示网格
+//	actor->GetProperty()->SetOpacity(1);//透明度
+//	//actor->GetProperty()->SetRepresentationToWireframe();//显示外网格
+//
+//	//renderer->AddActor(glyphActor);
+//	renderer->AddActor(actor);
+//
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
 
 
 
@@ -7478,4 +7603,2677 @@ int main(int argc, char* argv[])
 //		cout << outputFileName << " is finished." << endl;
 //	}
 //	return 0;
+//}
+
+
+//法线 二维四边形单元
+
+//#include <cmath>
+//#include <iostream>
+//#include <vector>
+//
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPolyDataNormals.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkCellData.h>
+//#include <vtkPointData.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkConeSource.h>
+//#include <vtkTransform.h>
+//#include <vtkTransformPolyDataFilter.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkCellCenters.h>
+//
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <fstream>
+//// #include <iostream>
+//
+//
+//class Vector3
+//{
+//public:
+//	Vector3();
+//	Vector3(double X_, double Y_, double Z_)
+//	{
+//		m_x = X_;
+//		m_y = Y_;
+//		m_z = Z_;
+//	}
+//
+//	const double x() { return m_x; }
+//	const double y() { return m_y; }
+//	const double z() { return m_z; }
+//
+//	Vector3 cross(Vector3& vec)
+//	{
+//		double X_ = this->y() * vec.z() - this->z() * vec.y();
+//		double Y_ = this->z() * vec.x() - this->x() * vec.z();
+//		double Z_ = this->x() * vec.y() - this->y() * vec.x();
+//
+//		return Vector3(X_, Y_, Z_);
+//	}
+//
+//	void normalized()
+//	{
+//		double w = sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+//		m_x /= w;
+//		m_y /= w;
+//		m_z /= w;
+//	}
+//
+//private:
+//	double m_x;
+//	double m_y;
+//	double m_z;
+//};
+//
+////给定三个点p1 p2 p3，返回由这三个点确定平面的法向n，已归一化
+//Vector3 getNormal(vector<double> p1, vector<double> p2, vector<double> p3)
+//{
+//	Vector3 v1(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+//	Vector3 v2(p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]);
+//
+//	Vector3 n = v1.cross(v2);
+//	n.normalized();
+//
+//	return n;
+//}
+//
+//vector<double> normalized(vector<double>& vector)
+//{
+//	double L = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+//	vector[0] /= L;
+//	vector[1] /= L;
+//	vector[2] /= L;
+//	return vector;
+//}
+//
+///*zNormal:该单元法向
+//* kSet:用户设置的x或y方向
+//* point:该单元中心坐标
+//* 返回x或y方向渗透率的投影方向
+//*/
+//vector<double>  projectionNormal(vector<double> zNormal, const vector<double> kSet, const double* point)
+//{
+//	//分别计算xNor（kSet[0]）和yNor（kSet[1]）
+//	double Q[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		Q[i] = point[i] + kSet[i];
+//	}
+//
+//	//temp: k在n方向上的投影数值大小
+//	double temp = (kSet[0] * zNormal[0] + kSet[1] * zNormal[1] + kSet[2] * zNormal[2]) /
+//		sqrt(zNormal[0] * zNormal[0] + zNormal[1] * zNormal[1] + zNormal[2] * zNormal[2]);
+//
+//	//单位化zNormal
+//	double n[3];
+//	n[0] = normalized(zNormal)[0];
+//	n[1] = normalized(zNormal)[1];
+//	n[2] = normalized(zNormal)[2];
+//
+//	double j[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		j[i] = temp * n[i];
+//	}
+//
+//	//R: 投影后的点R
+//	double R[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		R[i] = Q[i] - j[i];
+//	}
+//
+//	//r: 投影后向量方向
+//	double r[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		r[i] = R[i] - point[i];
+//	}
+//
+//	//结果写入projNor
+//	vector<double> projNor(3);
+//	for (int i = 0; i < 3; i++)
+//	{
+//		projNor[i] = r[i];
+//	}
+//
+//	return projNor;
+//}
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	//renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->SetBackground(colors->GetColor3d("Black").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//reader->SetFileName("Test01.vtk");
+//	//reader->SetFileName("step12.vtk");
+//	//reader->SetFileName("blade.vtk");
+//	//reader->SetFileName("plane.vtk");
+//	//reader->SetFileName("S.vtk");
+//	reader->SetFileName("qu.vtk");
+//	//reader->SetFileName("bladeGmsh3_vtk.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	// 叉乘得到的法向
+//	vector<double> calNor;
+//
+//	// 单元中心坐标
+//	vector<double> centrePoint;
+//	
+//	for (int i = 0; i < unstructuredGrid->GetNumberOfCells(); i++)
+//	{
+//		vector<double> p1, p2, p3, p4;
+//
+//		vtkPoints* point0 = unstructuredGrid->GetCell(i)->GetPoints();
+//		double* coors1 = point0->GetPoint(0);
+//		p1.push_back(*coors1);
+//		p1.push_back(*(coors1 + 1));
+//		p1.push_back(*(coors1 + 2));
+//
+//		double* coors2 = point0->GetPoint(1);
+//		p2.push_back(*coors2);
+//		p2.push_back(*(coors2 + 1));
+//		p2.push_back(*(coors2 + 2));
+//
+//		double* coors3 = point0->GetPoint(2);
+//		p3.push_back(*coors3);
+//		p3.push_back(*(coors3 + 1));
+//		p3.push_back(*(coors3 + 2));
+//
+//		double* coors4 = point0->GetPoint(3);
+//		p4.push_back(*coors4);
+//		p4.push_back(*(coors4 + 1));
+//		p4.push_back(*(coors4 + 2));
+//
+//		Vector3 cal_nor = getNormal(p1, p2, p3);
+//
+//		// 把p1 p2 p3平面的法向按顺序存进calNor
+//		calNor.push_back(cal_nor.x());
+//		calNor.push_back(cal_nor.y());
+//		calNor.push_back(cal_nor.z());
+//
+//		double x = (p1[0] + p2[0] + p3[0] + p4[0]) / 4;
+//		double y = (p1[1] + p2[1] + p3[1] + p4[1]) / 4;
+//		double z = (p1[2] + p2[2] + p3[2] + p4[2]) / 4;
+//
+//
+//		// 把i单元的中心点按顺序存进centrePoint
+//		centrePoint.push_back(x);
+//		centrePoint.push_back(y);
+//		centrePoint.push_back(z);
+//	}
+//
+//	ofstream ofs2;
+//	ofs2.open("calculate_Normal.txt", ios::out);
+//	ofs2 << "For points ---------------------: \n";
+//
+//	for (int i = 0; i < calNor.size(); i+=3)
+//	{
+//		ofs2 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	// unstructuredGrid 转换成 polydata
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> surfaceFilter =
+//		vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	surfaceFilter->SetInputData(unstructuredGrid);
+//	surfaceFilter->Update();
+//
+//	vtkPolyData* polydata = surfaceFilter->GetOutput();
+//
+//	/*------------------------------数据可视化------------------------------*/
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> dataSetMapper;
+//	dataSetMapper->SetInputData(unstructuredGrid);
+//	dataSetMapper->ScalarVisibilityOff();
+//	
+//	vtkNew<vtkProperty> backProp;
+//	backProp->SetDiffuseColor(colors->GetColor3d("Banana").GetData());
+//	backProp->SetSpecular(.6);
+//	backProp->SetSpecularPower(30);
+//	
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(dataSetMapper);
+//	actor->SetBackfaceProperty(backProp);
+//	actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//	actor->GetProperty()->SetSpecular(.3);
+//	actor->GetProperty()->SetSpecularPower(30);
+//	actor->GetProperty()->EdgeVisibilityOn();
+//	renderer->AddActor(actor);
+//	//
+//	/*renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();*/
+//	/*-----------------------------------------------------------------*/
+//
+//	vtkSmartPointer<vtkPolyDataMapper> mapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	mapper->SetInputConnection(surfaceFilter->GetOutputPort());
+//
+//	// 测试unstructuredgrid转为surface后的坐标顺序 ： 以单元编号开始输出对应的点坐标
+//	//for (int i = 0; i < 200; i++)
+//	//{
+//	//	double* point = surfaceFilter->GetOutput()->GetPoint(i);
+//	//	cout << i << " " << point[0] << " " << point[1] << " " << point[2] << endl;
+//	//}
+//
+//	vtkSmartPointer<vtkActor> surfaceActor =
+//		vtkSmartPointer<vtkActor>::New();
+//	surfaceActor->SetMapper(mapper);
+//	vtkSmartPointer<vtkPolyDataNormals> pdNormals =
+//		vtkSmartPointer<vtkPolyDataNormals>::New();
+//	pdNormals->SetInputConnection(surfaceFilter->GetOutputPort());
+//	pdNormals->ComputeCellNormalsOn();
+//	pdNormals->Update();
+//
+//	vtkPointData* ptData = pdNormals->GetOutput()->GetPointData();
+//
+//	ofstream ofs;
+//	vector<double*> zNormal;
+//	vector<double> kx;
+//	vector<double> ky;
+//	vector<double> kz;
+//	vector<double> cellKz;
+//
+//	//两个方向kx和ky
+//	vector<double> kxSet{ 1.0, 0.0, 0.0 };
+//	vector<double> kySet{ 0.0, 1.0, 0.0 };
+//
+//	if (ptData)
+//	{
+//		vtkDataArray* ptNormals = pdNormals->GetOutput()->GetPointData()->GetNormals();
+//		if (ptNormals)
+//		{
+//			//ofs创建normal.txt，写入文件头
+//			ofs.open("normal.txt", ios::out);
+//			ofs << "For points in every cell: \n";
+//			ofs << ptNormals->GetNumberOfTuples() << endl;
+//
+//			cout << "For points in every cell: \n";
+//			cout << ptNormals->GetNumberOfTuples() << endl;
+//			for (int i = 0; i < ptNormals->GetNumberOfTuples(); ++i)
+//			{
+//				double value[3];	//索引为i的法线方向
+//				ptNormals->GetTuple(i, value);
+//				
+//				// 输出点上法线方向
+//				ofs << i << " " << value[0] << " " << value[1] << " " << value[2] << endl;
+//
+//				zNormal.push_back(value);	//装入zNormal
+//
+//				// 是否换成kx、ky、kz ???  是
+//				kz.push_back(*value);
+//				kz.push_back(*(value + 1));
+//				kz.push_back(*(value + 2));
+//
+//				//	测试zNormal是否正确：正确
+//				std::cout << "ZNORMAL COUT::  " << (double)zNormal[i][0] << " " << (double)zNormal[i][1] << " " << (double)zNormal[i][2] << std::endl;
+//				cout << "KZ COUT:  " << kz[(0 + 3 * i)] << " " << kz[(1 + 3 * i)] << " " << kz[(2 + 3 * i)] << endl;
+//				cout << endl;
+//			}
+//
+//			//测试循环外Kz数值是否正确：正确
+//			for (int k = 0; k < kz.size(); k += 3)
+//			{
+//				cout << "AFTER FOR KZ COUT:  " << kz[k] << " " << kz[k + 1] << " " << kz[k + 2] << endl;
+//			}
+//		}
+//	}
+//	//单元上法线
+//
+//	//ofs << endl;
+//	//ofs << "For cells: \n";
+//	//cout << "For cells: \n";
+//	//if (pdNormals->GetOutput()->GetCellData() && pdNormals->GetOutput()->GetCellData()->GetNormals())
+//	//{
+//	//	vtkDataArray* cellNormals = pdNormals->GetOutput()->GetCellData()->GetNormals();
+//	//
+//	//	ofs.open("normal.txt", ios::out);
+//	//	ofs << "For points in every cell: \n";
+//	//	ofs << cellNormals->GetNumberOfTuples() << endl;
+//	//
+//	//	cout << "For points in every cell: \n";
+//	//	cout << cellNormals->GetNumberOfTuples() << endl;
+//	//	for (int i = 0; i < cellNormals->GetNumberOfTuples(); ++i)
+//	//	{
+//	//		double value[3];	//索引为i的法线方向
+//	//		cellNormals->GetTuple(i, value);
+//	//		printf("Value: (%d, %lf, %lf, %lf)\n", i, value[0], value[1], value[2]);
+//	//		ofs << i << " " << value[0] << " " << value[1] << " " << value[2] << endl;
+//	//
+//	//		zNormal.push_back(value);	//装入zNormal
+//	//
+//	//		// 是否换成kx、ky、kz ???  是
+//	//		kz.push_back(*value);
+//	//		kz.push_back(*(value + 1));
+//	//		kz.push_back(*(value + 2));
+//	//
+//	//		//	测试zNormal是否正确：正确
+//	//		printf("zNormal: (%d, %lf, %lf, %lf)\n", i, zNormal[i][0], zNormal[i][1], zNormal[i][2]);
+//	//		std::cout << "ZNORMAL COUT::  " << (double)zNormal[i][0] << " " << (double)zNormal[i][1] << " " << (double)zNormal[i][2] << std::endl;
+//	//		cout << "KZ COUT:  " << kz[(0 + 3 * i)] << " " << kz[(1 + 3 * i)] << " " << kz[(2 + 3 * i)] << endl;
+//	//		cout << endl;
+//	//	}
+//
+//	ofstream ofs1;
+//	ofs1.open("normalAndPoint.txt", ios::out);
+//	ofs1 << "For points ---------------------: \n";
+//
+//	// 投影
+//	for (int i = 0; i < calNor.size(); i+=3)
+//	{
+//		// double* point = pdNormals->GetOutput()->GetPoint(i);
+//		double point[3] = { centrePoint[i], centrePoint[i + 1], centrePoint[i + 2] };
+//		vector<double> n{ calNor[i], calNor[i + 1], calNor[i + 2] };
+//
+//		ofs1 << point[0] << " " << point[1] << " " << point[2] << endl;
+//
+//		vector<double> xProjNor(3);	//x方向上的投影
+//
+//		xProjNor = projectionNormal(n, kxSet, point);
+//		// 计算出的kxSet放入kx中
+//		kx.push_back(xProjNor[0]);
+//		kx.push_back(xProjNor[1]);
+//		kx.push_back(xProjNor[2]);
+//
+//		vector<double> yProjNor(3);	// y方向上投影
+//
+//		yProjNor = projectionNormal(n, kySet, point);
+//		// 计算出的kySet放入ky中
+//		ky.push_back(yProjNor[0]);
+//		ky.push_back(yProjNor[1]);
+//		ky.push_back(yProjNor[2]);
+//	}
+//
+//	ofs1 << "For Normals  kx  ---------------------: \n";
+//	for (int i = 0; i < kx.size(); i+=3)
+//	{
+//		ofs1 << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  ky  ---------------------: \n";
+//	for (int i = 0; i < ky.size(); i+=3)
+//	{
+//		ofs1 << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  kz  ---------------------: \n";
+//	for (int i = 0; i < calNor.size(); i+=3)
+//	{
+//		ofs1 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	// 单元法向量获取
+//	if (pdNormals->GetOutput()->GetCellData() && pdNormals->GetOutput()->GetCellData()->GetNormals())
+//	{
+//		vtkDataArray* cellNormals = pdNormals->GetOutput()->GetCellData()->GetNormals();
+//
+//		ofs << "For cell number: \n";
+//		ofs << cellNormals->GetNumberOfTuples() << endl;
+//
+//		cout << "For points in every cell: \n";
+//		cout << cellNormals->GetNumberOfTuples() << endl;
+//		for (int i = 0; i < cellNormals->GetNumberOfTuples(); ++i)
+//		{
+//			double value[3];	//索引为i的法线方向
+//			cellNormals->GetTuple(i, value);
+//
+//			cellKz.push_back(*value);
+//			cellKz.push_back(*(value + 1));
+//			cellKz.push_back(*(value + 2));
+//		}
+//	}
+//
+//	ofs1 << "For Normals  CellKz  ---------------------: \n";
+//	for (int i = 0; i < cellKz.size(); i+=3)
+//	{
+//		ofs1 << cellKz[i] << " " << cellKz[i + 1] << " " << cellKz[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "kx: " << " " << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "ky: " << " " << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//
+//
+//	vtkNew<vtkGlyphSource2D>arrow;//二维箭头
+//	arrow->SetGlyphTypeToArrow();
+//	arrow->FilledOff();
+//
+//	vtkSmartPointer<vtkTransform> transform =
+//		vtkSmartPointer<vtkTransform>::New();
+//	transform->RotateY(180); // make vertex outside
+//	vtkSmartPointer<vtkTransformPolyDataFilter> transformF =
+//		vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+//	//transformF->SetInputConnection(cone->GetOutputPort());
+//	transformF->SetInputConnection(arrow->GetOutputPort());
+//	transformF->SetTransform(transform);
+//
+//	vtkSmartPointer<vtkGlyph3D> glyph =
+//		vtkSmartPointer<vtkGlyph3D>::New();
+//	glyph->SetInputConnection(pdNormals->GetOutputPort());
+//	//glyph->SetSourceConnection(transformF->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetSourceConnection(arrow->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetVectorModeToUseNormal();
+//	glyph->SetScaleModeToScaleByVector();
+//	glyph->SetScaleFactor(16);
+//
+//	vtkSmartPointer<vtkPolyDataMapper> spikeMapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	spikeMapper->SetInputConnection(glyph->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> spikeActor = vtkSmartPointer<vtkActor>::New();
+//	spikeActor->SetMapper(spikeMapper);
+//	spikeActor->GetProperty()->SetColor(0.0, 0.79, 0.34);
+//
+//	// Add the actors to the renderer, set the background and size
+//	//renderer->AddActor(surfaceActor);
+//	renderer->AddActor(spikeActor);
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//设置方向
+
+//#include <cmath>
+//#include <iostream>
+//#include <vector>
+//
+//class HsPoint
+//{
+//public:
+//	HsPoint(double X_, double Y_, double Z_)
+//	{
+//		x = X_;
+//		y = Y_;
+//		z = Z_;
+//	}
+//	~HsPoint() {};
+//
+//private:
+//	double x;
+//	double y;
+//	double z;
+//};
+//
+//double* normalized(double* vector)
+//{
+//	double L = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+//	vector[0] /= L;
+//	vector[1] /= L;
+//	vector[2] /= L;
+//	return vector;
+//}
+//
+///*zNormal:单元法向
+//* kSet:用户设置的x和y方向
+//* point:单元中心坐标
+//* 返回3 x 3的矩阵
+//*/
+//vector<vector<double>>  projectionNormal(double* zNormal, vector<vector<double>> kSet, double* point)
+//{
+//	vector<vector<double>> projNor(3, vector<double>(3));
+//	
+//	//写入z方向
+//	for (int i = 0; i < 3; i++)
+//	{
+//		projNor[2][i] = zNormal[i];
+//	}
+//
+//	//分别计算xNor（kSet[0]）和yNor（kSet[1]）
+//	for (int i = 0; i < 2; i++)
+//	{
+//		double Q[3];
+//		for (int j = 0; j < 3; j++)
+//		{
+//			Q[j] = point[j] + kSet[i][j];
+//		}
+//
+//		//temp: k在n方向上的投影数值大小
+//		double temp = (kSet[i][0] * zNormal[0] + kSet[i][1] * zNormal[1] + kSet[i][2] * zNormal[2]) /
+//			sqrt(zNormal[0] * zNormal[0] + zNormal[1] * zNormal[1] + zNormal[2] * zNormal[2]);
+//
+//		//单位化zNormal
+//		double n[3];
+//		n[0] = normalized(zNormal)[0];
+//		n[1] = normalized(zNormal)[1];
+//		n[2] = normalized(zNormal)[2];
+//
+//		double j[3];
+//		for (int k = 0; k < 3; k++)
+//		{
+//			j[k] = temp * n[k];
+//		}
+//
+//		//R: 投影后的点R
+//		double R[3];
+//		for (int k = 0; k < 3; k++)
+//		{
+//			R[k] = Q[k] - j[k];
+//		}
+//
+//		//r: 投影后向量方向
+//		double r[3];
+//		for (int k = 0; k < 3; k++)
+//		{
+//			r[k] = R[k] - point[k];
+//		}
+//
+//		//结果写入projNor
+//		for (int k = 0; k < 3; k++)
+//		{
+//			projNor[i][k] = r[k];
+//		}
+//	}
+//
+//	return projNor;
+//}
+//
+//int main()
+//{
+//	double point[3] = { 0.0, 0.0, 0.0 };
+//	double zNormal[3] = { 0.0, -0.789316, -0.613987 };
+//
+//	vector<vector<double>> kSet = { {1.0, 0.0, 0.0},
+//									{0.0, 1.0, 0.0} };
+//
+//	vector<vector<double>> projNor;
+//	projNor = projectionNormal(zNormal, kSet, point);
+//
+//	for (int i = 0; i < 3; i++)
+//	{
+//		for (int j = 0; j < 3; j++)
+//		{
+//		std::cout << projNor[i][j] << std::endl;
+//		}
+//	}
+//
+//	return 0;
+//}
+
+
+
+// 读取点云文件
+
+//#include <vtkVertexGlyphFilter.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkActor.h>
+//#include <vtkRenderer.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <sstream>
+//
+//#include <vtkAutoInit.h> 
+//
+//int main(int, char* [])
+//{
+//	std::string filename = "point.txt";
+//	std::ifstream filestream(filename.c_str());
+//
+//	std::string line;
+//	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+//	while (std::getline(filestream, line))
+//	{
+//		double x, y, z;
+//		std::stringstream linestream;
+//		linestream << line;
+//		linestream >> x >> y >> z;
+//
+//		points->InsertNextPoint(x, y, z);
+//	}
+//
+//	filestream.close();
+//
+//	vtkSmartPointer<vtkPolyData> polyData =
+//		vtkSmartPointer<vtkPolyData>::New();
+//
+//	polyData->SetPoints(points);
+//
+//	vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+//	glyphFilter->SetInputData(polyData);
+//	glyphFilter->Update();
+//
+//	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+//	mapper->SetInputConnection(glyphFilter->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(mapper);
+//
+//	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+//	renderer->AddActor(actor);
+//	renderer->SetBackground(.3, .6, .3);
+//
+//	vtkSmartPointer<vtkRenderWindow> renWin = vtkSmartPointer<vtkRenderWindow>::New();
+//	renWin->AddRenderer(renderer);
+//
+//	vtkSmartPointer<vtkRenderWindowInteractor> iren = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	iren->SetRenderWindow(renWin);
+//	vtkSmartPointer< vtkInteractorStyleTrackballCamera> style = vtkSmartPointer< vtkInteractorStyleTrackballCamera>::New();
+//	iren->SetInteractorStyle(style);
+//
+//	renWin->SetSize(600, 600);
+//	renWin->Render();
+//	iren->Start();
+//
+//	return 0;
+//}
+
+
+
+//三维一层方向设置
+
+//#include <cmath>
+//#include <iostream>
+//#include <vector>
+//
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPolyDataNormals.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkCellData.h>
+//#include <vtkPointData.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkConeSource.h>
+//#include <vtkTransform.h>
+//#include <vtkTransformPolyDataFilter.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkCellCenters.h>
+//#include <vtkIdList.h>
+//
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <fstream>
+//
+//
+//class Vector3
+//{
+//public:
+//	Vector3();
+//	Vector3(double X_, double Y_, double Z_)
+//	{
+//		m_x = X_;
+//		m_y = Y_;
+//		m_z = Z_;
+//	}
+//
+//	const double x() { return m_x; }
+//	const double y() { return m_y; }
+//	const double z() { return m_z; }
+//
+//	Vector3 cross(Vector3& vec)
+//	{
+//		double X_ = this->y() * vec.z() - this->z() * vec.y();
+//		double Y_ = this->z() * vec.x() - this->x() * vec.z();
+//		double Z_ = this->x() * vec.y() - this->y() * vec.x();
+//
+//		return Vector3(X_, Y_, Z_);
+//	}
+//
+//	void normalized()
+//	{
+//		double w = sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+//		m_x /= w;
+//		m_y /= w;
+//		m_z /= w;
+//	}
+//
+//private:
+//	double m_x;
+//	double m_y;
+//	double m_z;
+//};
+//
+////给定三个点p1 p2 p3，返回由这三个点确定平面的法向n，已归一化
+//Vector3 getNormal(vector<double> p1, vector<double> p2, vector<double> p3)
+//{
+//	Vector3 v1(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+//	Vector3 v2(p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]);
+//
+//	Vector3 n = v1.cross(v2);
+//	n.normalized();
+//
+//	return n;
+//}
+//
+//vector<double> normalized(vector<double>& vector)
+//{
+//	double L = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+//	vector[0] /= L;
+//	vector[1] /= L;
+//	vector[2] /= L;
+//	return vector;
+//}
+//
+///*zNormal:该单元法向
+//* kSet:用户设置的x或y方向
+//* point:该单元中心坐标
+//* 返回x或y方向渗透率的投影方向
+//*/
+//vector<double>  projectionNormal(vector<double> zNormal, const vector<double> kSet, const double* point)
+//{
+//	//分别计算xNor（kSet[0]）和yNor（kSet[1]）
+//	double Q[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		Q[i] = point[i] + kSet[i];
+//	}
+//
+//	//temp: k在n方向上的投影数值大小
+//	double temp = (kSet[0] * zNormal[0] + kSet[1] * zNormal[1] + kSet[2] * zNormal[2]) /
+//		sqrt(zNormal[0] * zNormal[0] + zNormal[1] * zNormal[1] + zNormal[2] * zNormal[2]);
+//
+//	//单位化zNormal
+//	double n[3];
+//	n[0] = normalized(zNormal)[0];
+//	n[1] = normalized(zNormal)[1];
+//	n[2] = normalized(zNormal)[2];
+//
+//	double j[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		j[i] = temp * n[i];
+//	}
+//
+//	//R: 投影后的点R
+//	double R[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		R[i] = Q[i] - j[i];
+//	}
+//
+//	//r: 投影后向量方向
+//	double r[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		r[i] = R[i] - point[i];
+//	}
+//
+//	//结果写入projNor
+//	vector<double> projNor(3);
+//	for (int i = 0; i < 3; i++)
+//	{
+//		projNor[i] = r[i];
+//	}
+//
+//	return projNor;
+//}
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	//renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->SetBackground(colors->GetColor3d("Black").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//reader->SetFileName("Test01.vtk");
+//	//reader->SetFileName("step12.vtk");
+//	//reader->SetFileName("blade.vtk");
+//	//reader->SetFileName("plane.vtk");
+//	//reader->SetFileName("S.vtk");
+//	//reader->SetFileName("qu.vtk");
+//	reader->SetFileName("blade2lay.vtk");
+//	//reader->SetFileName("bladeGmsh3_vtk.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	// 叉乘得到的法向
+//	vector<double> calNor;
+//
+//	// 单元中心坐标
+//	vector<double> centrePoint;
+//
+//	for (int i = 0; i < unstructuredGrid->GetNumberOfCells(); i++)
+//	{
+//		vector<double> p1, p2, p3, p4, p5, p6, p7, p8;
+//
+//		//get单元i包含的所有点的id
+//		vtkIdList* pointList = unstructuredGrid->GetCell(i)->GetPointIds();
+//		int id0 = pointList->GetId(0);
+//		int id1 = pointList->GetId(1);
+//		int id2 = pointList->GetId(2);
+//		int id3 = pointList->GetId(3);
+//		int id4 = pointList->GetId(4);
+//		int id5 = pointList->GetId(5);
+//		int id6 = pointList->GetId(6);
+//		int id7 = pointList->GetId(7);
+//
+//		//给单元i包含的点id排序，arr[]为排序后id编号数组
+//		int arr[8] = { id0, id1, id2, id3, id4, id5, id6, id7 };
+//		for (int j = 0; j < 8; j++)
+//		{
+//			int value = arr[j];
+//			int position = j;
+//			while (position > 0 && arr[position - 1] > value)
+//			{
+//				arr[position] = arr[position - 1];
+//				position--;
+//			}
+//			arr[position] = value;
+//		}
+//
+//		double* coors1 = unstructuredGrid->GetPoint(arr[0]);
+//		p1.push_back(*coors1);
+//		p1.push_back(*(coors1 + 1));
+//		p1.push_back(*(coors1 + 2));
+//
+//		double* coors2 = unstructuredGrid->GetPoint(arr[1]);
+//		p2.push_back(*coors2);
+//		p2.push_back(*(coors2 + 1));
+//		p2.push_back(*(coors2 + 2));
+//
+//		double* coors3 = unstructuredGrid->GetPoint(arr[2]);
+//		p3.push_back(*coors3);
+//		p3.push_back(*(coors3 + 1));
+//		p3.push_back(*(coors3 + 2));
+//
+//		double* coors4 = unstructuredGrid->GetPoint(arr[3]);
+//		p4.push_back(*coors4);
+//		p4.push_back(*(coors4 + 1));
+//		p4.push_back(*(coors4 + 2));
+//
+//		double* coors5 = unstructuredGrid->GetPoint(arr[4]);
+//		p5.push_back(*coors5);
+//		p5.push_back(*(coors5 + 1));
+//		p5.push_back(*(coors5 + 2));
+//
+//		double* coors6 = unstructuredGrid->GetPoint(arr[5]);
+//		p6.push_back(*coors6);
+//		p6.push_back(*(coors6 + 1));
+//		p6.push_back(*(coors6 + 2));
+//
+//		double* coors7 = unstructuredGrid->GetPoint(arr[6]);
+//		p7.push_back(*coors7);
+//		p7.push_back(*(coors7 + 1));
+//		p7.push_back(*(coors7 + 2));
+//
+//		double* coors8 = unstructuredGrid->GetPoint(arr[7]);
+//		p8.push_back(*coors8);
+//		p8.push_back(*(coors8 + 1));
+//		p8.push_back(*(coors8 + 2));
+//
+//		Vector3 cal_nor = getNormal(p1, p2, p3);
+//
+//		// 把p1 p2 p3平面的法向按顺序存进calNor
+//		calNor.push_back(cal_nor.x());
+//		calNor.push_back(cal_nor.y());
+//		calNor.push_back(cal_nor.z());
+//
+//		double x = (p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double y = (p1[1] + p2[1] + p3[1] + p4[1] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double z = (p1[2] + p2[2] + p3[2] + p4[2] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//
+//
+//		// 把i单元的中心点按顺序存进centrePoint
+//		centrePoint.push_back(x);
+//		centrePoint.push_back(y);
+//		centrePoint.push_back(z);
+//	}
+//
+//	ofstream ofs2;
+//	ofs2.open("calculate_Normal.txt", ios::out);
+//	ofs2 << "For points ---------------------: \n";
+//
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs2 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	// unstructuredGrid 转换成 polydata
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> surfaceFilter =
+//		vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	surfaceFilter->SetInputData(unstructuredGrid);
+//	surfaceFilter->Update();
+//
+//	vtkPolyData* polydata = surfaceFilter->GetOutput();
+//
+//	/*------------------------------数据可视化------------------------------*/
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> dataSetMapper;
+//	dataSetMapper->SetInputData(unstructuredGrid);
+//	dataSetMapper->ScalarVisibilityOff();
+//
+//	vtkNew<vtkProperty> backProp;
+//	backProp->SetDiffuseColor(colors->GetColor3d("Banana").GetData());
+//	backProp->SetSpecular(.6);
+//	backProp->SetSpecularPower(30);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(dataSetMapper);
+//	actor->SetBackfaceProperty(backProp);
+//	actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//	actor->GetProperty()->SetSpecular(.3);
+//	actor->GetProperty()->SetSpecularPower(30);
+//	actor->GetProperty()->EdgeVisibilityOn();
+//	renderer->AddActor(actor);
+//	/*-----------------------------------------------------------------*/
+//
+//	vtkSmartPointer<vtkPolyDataNormals> pdNormals =
+//		vtkSmartPointer<vtkPolyDataNormals>::New();
+//	pdNormals->SetInputConnection(surfaceFilter->GetOutputPort());
+//	pdNormals->ComputeCellNormalsOn();
+//	pdNormals->Update();
+//
+//	vtkPointData* ptData = pdNormals->GetOutput()->GetPointData();
+//
+//	ofstream ofs;
+//	vector<double*> zNormal;
+//	vector<double> kx;
+//	vector<double> ky;
+//	vector<double> kz;
+//
+//	//两个方向kx和ky
+//	vector<double> kxSet{ 1.0, 0.0, 0.0 };
+//	vector<double> kySet{ 0.0, 1.0, 0.0 };
+//
+//	if (ptData)
+//	{
+//		vtkDataArray* ptNormals = pdNormals->GetOutput()->GetPointData()->GetNormals();
+//		if (ptNormals)
+//		{
+//			//ofs创建normal.txt，写入文件头
+//			ofs.open("normal.txt", ios::out);
+//			ofs << "For points in every cell: \n";
+//			ofs << ptNormals->GetNumberOfTuples() << endl;
+//
+//			cout << "For points in every cell: \n";
+//			cout << ptNormals->GetNumberOfTuples() << endl;
+//			for (int i = 0; i < ptNormals->GetNumberOfTuples(); ++i)
+//			{
+//				double value[3];	//索引为i的法线方向
+//				ptNormals->GetTuple(i, value);
+//
+//				// 输出点上法线方向
+//				ofs << i << " " << value[0] << " " << value[1] << " " << value[2] << endl;
+//
+//				zNormal.push_back(value);	//装入zNormal
+//
+//				// 是否换成kx、ky、kz ???  是
+//				kz.push_back(*value);
+//				kz.push_back(*(value + 1));
+//				kz.push_back(*(value + 2));
+//
+//				//	测试zNormal是否正确：正确
+//				std::cout << "ZNORMAL COUT::  " << (double)zNormal[i][0] << " " << (double)zNormal[i][1] << " " << (double)zNormal[i][2] << std::endl;
+//				cout << "KZ COUT:  " << kz[(0 + 3 * i)] << " " << kz[(1 + 3 * i)] << " " << kz[(2 + 3 * i)] << endl;
+//				cout << endl;
+//			}
+//
+//			//测试循环外Kz数值是否正确：正确
+//			for (int k = 0; k < kz.size(); k += 3)
+//			{
+//				cout << "AFTER FOR KZ COUT:  " << kz[k] << " " << kz[k + 1] << " " << kz[k + 2] << endl;
+//			}
+//		}
+//	}
+//
+//	ofstream ofs1;
+//	ofs1.open("normalAndPoint.txt", ios::out);
+//	ofs1 << "For points ---------------------: \n";
+//
+//	// 投影
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		// double* point = pdNormals->GetOutput()->GetPoint(i);
+//		double point[3] = { centrePoint[i], centrePoint[i + 1], centrePoint[i + 2] };
+//		vector<double> n{ calNor[i], calNor[i + 1], calNor[i + 2] };
+//
+//		ofs1 << point[0] << " " << point[1] << " " << point[2] << endl;
+//
+//		vector<double> xProjNor(3);	//x方向上的投影
+//
+//		xProjNor = projectionNormal(n, kxSet, point);
+//		// 计算出的kxSet放入kx中
+//		kx.push_back(xProjNor[0]);
+//		kx.push_back(xProjNor[1]);
+//		kx.push_back(xProjNor[2]);
+//
+//		vector<double> yProjNor(3);	// y方向上投影
+//
+//		yProjNor = projectionNormal(n, kySet, point);
+//		// 计算出的kySet放入ky中
+//		ky.push_back(yProjNor[0]);
+//		ky.push_back(yProjNor[1]);
+//		ky.push_back(yProjNor[2]);
+//	}
+//
+//	ofs1 << "For Normals  kx  ---------------------: \n";
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs1 << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  ky  ---------------------: \n";
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs1 << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  kz  ---------------------: \n";
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs1 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "kx: " << " " << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "ky: " << " " << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	vtkNew<vtkGlyphSource2D>arrow;//二维箭头
+//	arrow->SetGlyphTypeToArrow();
+//	arrow->FilledOff();
+//
+//	vtkSmartPointer<vtkTransform> transform =
+//		vtkSmartPointer<vtkTransform>::New();
+//	transform->RotateY(180); // make vertex outside
+//	vtkSmartPointer<vtkTransformPolyDataFilter> transformF =
+//		vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+//	//transformF->SetInputConnection(cone->GetOutputPort());
+//	transformF->SetInputConnection(arrow->GetOutputPort());
+//	transformF->SetTransform(transform);
+//
+//	vtkSmartPointer<vtkGlyph3D> glyph =
+//		vtkSmartPointer<vtkGlyph3D>::New();
+//	glyph->SetInputConnection(pdNormals->GetOutputPort());
+//	//glyph->SetSourceConnection(transformF->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetSourceConnection(arrow->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetVectorModeToUseNormal();
+//	glyph->SetScaleModeToScaleByVector();
+//	glyph->SetScaleFactor(16);
+//
+//	vtkSmartPointer<vtkPolyDataMapper> spikeMapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	spikeMapper->SetInputConnection(glyph->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> spikeActor = vtkSmartPointer<vtkActor>::New();
+//	spikeActor->SetMapper(spikeMapper);
+//	spikeActor->GetProperty()->SetColor(0.0, 0.79, 0.34);
+//
+//	// Add the actors to the renderer, set the background and size
+//	//renderer->AddActor(surfaceActor);
+//	renderer->AddActor(spikeActor);
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//三维多层方向设置  适用于drag拉伸的网格
+
+//#include <cmath>
+//#include <iostream>
+//#include <vector>
+//
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPolyDataNormals.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkCellData.h>
+//#include <vtkPointData.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkConeSource.h>
+//#include <vtkTransform.h>
+//#include <vtkTransformPolyDataFilter.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkCellCenters.h>
+//#include <vtkIdList.h>
+//
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <fstream>
+//
+//
+//class Vector3
+//{
+//public:
+//	Vector3();
+//	Vector3(double X_, double Y_, double Z_)
+//	{
+//		m_x = X_;
+//		m_y = Y_;
+//		m_z = Z_;
+//	}
+//
+//	const double x() { return m_x; }
+//	const double y() { return m_y; }
+//	const double z() { return m_z; }
+//
+//	Vector3 cross(Vector3& vec)
+//	{
+//		double X_ = this->y() * vec.z() - this->z() * vec.y();
+//		double Y_ = this->z() * vec.x() - this->x() * vec.z();
+//		double Z_ = this->x() * vec.y() - this->y() * vec.x();
+//
+//		return Vector3(X_, Y_, Z_);
+//	}
+//
+//	void normalized()
+//	{
+//		double w = sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+//		m_x /= w;
+//		m_y /= w;
+//		m_z /= w;
+//	}
+//
+//private:
+//	double m_x;
+//	double m_y;
+//	double m_z;
+//};
+//
+////给定三个点p1 p2 p3，返回由这三个点确定平面的法向n，已归一化
+//Vector3 getNormal(vector<double> p1, vector<double> p2, vector<double> p3)
+//{
+//	Vector3 v1(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+//	Vector3 v2(p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]);
+//
+//	Vector3 n = v1.cross(v2);
+//	n.normalized();
+//
+//	return n;
+//}
+//
+//vector<double> normalized(vector<double>& vector)
+//{
+//	double L = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+//	vector[0] /= L;
+//	vector[1] /= L;
+//	vector[2] /= L;
+//	return vector;
+//}
+//
+///*zNormal:该单元法向
+//* kSet:用户设置的x或y方向
+//* point:该单元中心坐标
+//* 返回x或y方向渗透率的投影方向
+//*/
+//vector<double>  projectionNormal(vector<double> zNormal, const vector<double> kSet, const double* point)
+//{
+//	//分别计算xNor（kSet[0]）和yNor（kSet[1]）
+//	double Q[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		Q[i] = point[i] + kSet[i];
+//	}
+//
+//	//temp: k在n方向上的投影数值大小
+//	double temp = (kSet[0] * zNormal[0] + kSet[1] * zNormal[1] + kSet[2] * zNormal[2]) /
+//		sqrt(zNormal[0] * zNormal[0] + zNormal[1] * zNormal[1] + zNormal[2] * zNormal[2]);
+//
+//	//单位化zNormal
+//	double n[3];
+//	n[0] = normalized(zNormal)[0];
+//	n[1] = normalized(zNormal)[1];
+//	n[2] = normalized(zNormal)[2];
+//
+//	double j[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		j[i] = temp * n[i];
+//	}
+//
+//	//R: 投影后的点R
+//	double R[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		R[i] = Q[i] - j[i];
+//	}
+//
+//	//r: 投影后向量方向
+//	double r[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		r[i] = R[i] - point[i];
+//	}
+//
+//	//结果写入projNor
+//	vector<double> projNor(3);
+//	for (int i = 0; i < 3; i++)
+//	{
+//		projNor[i] = r[i];
+//	}
+//
+//	return projNor;
+//}
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	//renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->SetBackground(colors->GetColor3d("Black").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//reader->SetFileName("Test01.vtk");
+//	//reader->SetFileName("step12.vtk");
+//	//reader->SetFileName("blade.vtk");
+//	//reader->SetFileName("plane.vtk");
+//	//reader->SetFileName("S.vtk");
+//	//reader->SetFileName("qu.vtk");
+//	reader->SetFileName("blade3.vtk");
+//	//reader->SetFileName("bladeGmsh3_vtk.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	// 叉乘得到的法向
+//	vector<double> calNor;
+//
+//	// 单元中心坐标
+//	vector<double> centrePoint;
+//
+//	for (int i = 0; i < unstructuredGrid->GetNumberOfCells(); i++)
+//	{
+//		vector<double> p1, p2, p3, p4, p5, p6, p7, p8;
+//
+//		//get单元i包含的所有点的id
+//		vtkIdList* pointList = unstructuredGrid->GetCell(i)->GetPointIds();
+//		int id0 = pointList->GetId(0);
+//		int id1 = pointList->GetId(1);
+//		int id2 = pointList->GetId(2);
+//		int id3 = pointList->GetId(3);
+//		int id4 = pointList->GetId(4);
+//		int id5 = pointList->GetId(5);
+//		int id6 = pointList->GetId(6);
+//		int id7 = pointList->GetId(7);
+//
+//		//给单元i包含的点id排序，arr[]为排序后id编号数组
+//		int arr[8] = { id0, id1, id2, id3, id4, id5, id6, id7 };
+//		for (int j = 0; j < 8; j++)
+//		{
+//			int value = arr[j];
+//			int position = j;
+//			while (position > 0 && arr[position - 1] > value)
+//			{
+//				arr[position] = arr[position - 1];
+//				position--;
+//			}
+//			arr[position] = value;
+//		}
+//
+//		double* coors1 = unstructuredGrid->GetPoint(arr[0]);
+//		p1.push_back(*coors1);
+//		p1.push_back(*(coors1 + 1));
+//		p1.push_back(*(coors1 + 2));
+//
+//		double* coors2 = unstructuredGrid->GetPoint(arr[1]);
+//		p2.push_back(*coors2);
+//		p2.push_back(*(coors2 + 1));
+//		p2.push_back(*(coors2 + 2));
+//
+//		double* coors3 = unstructuredGrid->GetPoint(arr[2]);
+//		p3.push_back(*coors3);
+//		p3.push_back(*(coors3 + 1));
+//		p3.push_back(*(coors3 + 2));
+//
+//		double* coors4 = unstructuredGrid->GetPoint(arr[3]);
+//		p4.push_back(*coors4);
+//		p4.push_back(*(coors4 + 1));
+//		p4.push_back(*(coors4 + 2));
+//
+//		double* coors5 = unstructuredGrid->GetPoint(arr[4]);
+//		p5.push_back(*coors5);
+//		p5.push_back(*(coors5 + 1));
+//		p5.push_back(*(coors5 + 2));
+//
+//		double* coors6 = unstructuredGrid->GetPoint(arr[5]);
+//		p6.push_back(*coors6);
+//		p6.push_back(*(coors6 + 1));
+//		p6.push_back(*(coors6 + 2));
+//
+//		double* coors7 = unstructuredGrid->GetPoint(arr[6]);
+//		p7.push_back(*coors7);
+//		p7.push_back(*(coors7 + 1));
+//		p7.push_back(*(coors7 + 2));
+//
+//		double* coors8 = unstructuredGrid->GetPoint(arr[7]);
+//		p8.push_back(*coors8);
+//		p8.push_back(*(coors8 + 1));
+//		p8.push_back(*(coors8 + 2));
+//
+//		Vector3 cal_nor = getNormal(p1, p2, p3);
+//
+//		// 把p1 p2 p3平面的法向按顺序存进calNor
+//		calNor.push_back(cal_nor.x());
+//		calNor.push_back(cal_nor.y());
+//		calNor.push_back(cal_nor.z());
+//
+//		double x = (p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double y = (p1[1] + p2[1] + p3[1] + p4[1] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double z = (p1[2] + p2[2] + p3[2] + p4[2] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//
+//
+//		// 把i单元的中心点按顺序存进centrePoint
+//		centrePoint.push_back(x);
+//		centrePoint.push_back(y);
+//		centrePoint.push_back(z);
+//	}
+//
+//	ofstream ofs2;
+//	ofs2.open("calculate_Normal.txt", ios::out);
+//	ofs2 << "For points ---------------------: \n";
+//
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs2 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	// unstructuredGrid 转换成 polydata
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> surfaceFilter =
+//		vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	surfaceFilter->SetInputData(unstructuredGrid);
+//	surfaceFilter->Update();
+//
+//	vtkPolyData* polydata = surfaceFilter->GetOutput();
+//
+//	/*------------------------------数据可视化------------------------------*/
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> dataSetMapper;
+//	dataSetMapper->SetInputData(unstructuredGrid);
+//	dataSetMapper->ScalarVisibilityOff();
+//
+//	vtkNew<vtkProperty> backProp;
+//	backProp->SetDiffuseColor(colors->GetColor3d("Banana").GetData());
+//	backProp->SetSpecular(.6);
+//	backProp->SetSpecularPower(30);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(dataSetMapper);
+//	actor->SetBackfaceProperty(backProp);
+//	actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//	actor->GetProperty()->SetSpecular(.3);
+//	actor->GetProperty()->SetSpecularPower(30);
+//	actor->GetProperty()->EdgeVisibilityOn();
+//	renderer->AddActor(actor);
+//	/*-----------------------------------------------------------------*/
+//
+//	vtkSmartPointer<vtkPolyDataNormals> pdNormals =
+//		vtkSmartPointer<vtkPolyDataNormals>::New();
+//	pdNormals->SetInputConnection(surfaceFilter->GetOutputPort());
+//	pdNormals->ComputeCellNormalsOn();
+//	pdNormals->Update();
+//
+//	vtkPointData* ptData = pdNormals->GetOutput()->GetPointData();
+//
+//	ofstream ofs;
+//	vector<double*> zNormal;
+//	vector<double> kx;
+//	vector<double> ky;
+//	vector<double> kz;
+//
+//	//两个方向kx和ky
+//	vector<double> kxSet{ 1.0, 0.0, 0.0 };
+//	vector<double> kySet{ 0.0, 1.0, 0.0 };
+//
+//	if (ptData)
+//	{
+//		vtkDataArray* ptNormals = pdNormals->GetOutput()->GetPointData()->GetNormals();
+//		if (ptNormals)
+//		{
+//			//ofs创建normal.txt，写入文件头
+//			ofs.open("normal.txt", ios::out);
+//			ofs << "For points in every cell: \n";
+//			ofs << ptNormals->GetNumberOfTuples() << endl;
+//
+//			cout << "For points in every cell: \n";
+//			cout << ptNormals->GetNumberOfTuples() << endl;
+//			for (int i = 0; i < ptNormals->GetNumberOfTuples(); ++i)
+//			{
+//				double value[3];	//索引为i的法线方向
+//				ptNormals->GetTuple(i, value);
+//
+//				// 输出点上法线方向
+//				ofs << i << " " << value[0] << " " << value[1] << " " << value[2] << endl;
+//
+//				zNormal.push_back(value);	//装入zNormal
+//
+//				// 是否换成kx、ky、kz ???  是
+//				kz.push_back(*value);
+//				kz.push_back(*(value + 1));
+//				kz.push_back(*(value + 2));
+//
+//				//	测试zNormal是否正确：正确
+//				std::cout << "ZNORMAL COUT::  " << (double)zNormal[i][0] << " " << (double)zNormal[i][1] << " " << (double)zNormal[i][2] << std::endl;
+//				cout << "KZ COUT:  " << kz[(0 + 3 * i)] << " " << kz[(1 + 3 * i)] << " " << kz[(2 + 3 * i)] << endl;
+//				cout << endl;
+//			}
+//
+//			//测试循环外Kz数值是否正确：正确
+//			for (int k = 0; k < kz.size(); k += 3)
+//			{
+//				cout << "AFTER FOR KZ COUT:  " << kz[k] << " " << kz[k + 1] << " " << kz[k + 2] << endl;
+//			}
+//		}
+//	}
+//
+//	ofstream ofs1;
+//	ofs1.open("normalAndPoint.txt", ios::out);
+//	ofs1 << "For points ---------------------: \n";
+//
+//	// 投影
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		// double* point = pdNormals->GetOutput()->GetPoint(i);
+//		double point[3] = { centrePoint[i], centrePoint[i + 1], centrePoint[i + 2] };
+//		vector<double> n{ calNor[i], calNor[i + 1], calNor[i + 2] };
+//
+//		ofs1 << point[0] << " " << point[1] << " " << point[2] << endl;
+//
+//		vector<double> xProjNor(3);	//x方向上的投影
+//
+//		xProjNor = projectionNormal(n, kxSet, point);
+//		// 计算出的kxSet放入kx中
+//		kx.push_back(xProjNor[0]);
+//		kx.push_back(xProjNor[1]);
+//		kx.push_back(xProjNor[2]);
+//
+//		vector<double> yProjNor(3);	// y方向上投影
+//
+//		yProjNor = projectionNormal(n, kySet, point);
+//		// 计算出的kySet放入ky中
+//		ky.push_back(yProjNor[0]);
+//		ky.push_back(yProjNor[1]);
+//		ky.push_back(yProjNor[2]);
+//	}
+//
+//	ofs1 << "For Normals  kx  ---------------------: \n";
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs1 << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  ky  ---------------------: \n";
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs1 << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  kz  ---------------------: \n";
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs1 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "kx: " << " " << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs << i / 3 << " " << "ky: " << " " << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	vtkNew<vtkGlyphSource2D>arrow;//二维箭头
+//	arrow->SetGlyphTypeToArrow();
+//	arrow->FilledOff();
+//
+//	vtkSmartPointer<vtkTransform> transform =
+//		vtkSmartPointer<vtkTransform>::New();
+//	transform->RotateY(180); // make vertex outside
+//	vtkSmartPointer<vtkTransformPolyDataFilter> transformF =
+//		vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+//	//transformF->SetInputConnection(cone->GetOutputPort());
+//	transformF->SetInputConnection(arrow->GetOutputPort());
+//	transformF->SetTransform(transform);
+//
+//	vtkSmartPointer<vtkGlyph3D> glyph =
+//		vtkSmartPointer<vtkGlyph3D>::New();
+//	glyph->SetInputConnection(pdNormals->GetOutputPort());
+//	//glyph->SetSourceConnection(transformF->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetSourceConnection(arrow->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetVectorModeToUseNormal();
+//	glyph->SetScaleModeToScaleByVector();
+//	glyph->SetScaleFactor(16);
+//
+//	vtkSmartPointer<vtkPolyDataMapper> spikeMapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	spikeMapper->SetInputConnection(glyph->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> spikeActor = vtkSmartPointer<vtkActor>::New();
+//	spikeActor->SetMapper(spikeMapper);
+//	spikeActor->GetProperty()->SetColor(0.0, 0.79, 0.34);
+//
+//	// Add the actors to the renderer, set the background and size
+//	//renderer->AddActor(surfaceActor);
+//	renderer->AddActor(spikeActor);
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+//三维多层方向设置  偏置网格
+
+//#include <cmath>
+//#include <iostream>
+//#include <vector>
+//
+//#include <vtkAppendFilter.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//
+//#include <vtkActor.h>
+//#include <vtkCamera.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPolyDataNormals.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkCellData.h>
+//#include <vtkPointData.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkConeSource.h>
+//#include <vtkTransform.h>
+//#include <vtkTransformPolyDataFilter.h>
+//#include <vtkGlyph3D.h>
+//#include <vtkGlyphSource2D.h>
+//#include <vtkCellCenters.h>
+//#include <vtkIdList.h>
+//
+//#include <algorithm>
+//#include <array>
+//#include <string>
+//#include <fstream>
+//
+//
+//class Vector3
+//{
+//public:
+//	Vector3();
+//	Vector3(double X_, double Y_, double Z_)
+//	{
+//		m_x = X_;
+//		m_y = Y_;
+//		m_z = Z_;
+//	}
+//
+//	const double x() { return m_x; }
+//	const double y() { return m_y; }
+//	const double z() { return m_z; }
+//
+//	Vector3 cross(Vector3& vec)
+//	{
+//		double X_ = this->y() * vec.z() - this->z() * vec.y();
+//		double Y_ = this->z() * vec.x() - this->x() * vec.z();
+//		double Z_ = this->x() * vec.y() - this->y() * vec.x();
+//
+//		return Vector3(X_, Y_, Z_);
+//	}
+//
+//	void normalized()
+//	{
+//		double w = sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+//		m_x /= w;
+//		m_y /= w;
+//		m_z /= w;
+//	}
+//
+//private:
+//	double m_x;
+//	double m_y;
+//	double m_z;
+//};
+//
+////给定三个点p1 p2 p3，返回由这三个点确定平面的法向n，已归一化
+//Vector3 getNormal(vector<double> p1, vector<double> p2, vector<double> p3)
+//{
+//	Vector3 v1(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+//	Vector3 v2(p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]);
+//
+//	Vector3 n = v1.cross(v2);
+//	n.normalized();
+//
+//	return n;
+//}
+//
+//vector<double> normalized(vector<double>& vector)
+//{
+//	double L = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+//	vector[0] /= L;
+//	vector[1] /= L;
+//	vector[2] /= L;
+//	return vector;
+//}
+//
+///*zNormal:该单元法向
+//* kSet:用户设置的x或y方向
+//* point:该单元中心坐标
+//* 返回x或y方向渗透率的投影方向
+//*/
+//vector<double>  projectionNormal(vector<double> zNormal, const vector<double> kSet, const double* point)
+//{
+//	//分别计算xNor（kSet[0]）和yNor（kSet[1]）
+//	double Q[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		Q[i] = point[i] + kSet[i];
+//	}
+//
+//	//temp: k在n方向上的投影数值大小
+//	double temp = (kSet[0] * zNormal[0] + kSet[1] * zNormal[1] + kSet[2] * zNormal[2]) /
+//		sqrt(zNormal[0] * zNormal[0] + zNormal[1] * zNormal[1] + zNormal[2] * zNormal[2]);
+//
+//	//单位化zNormal
+//	double n[3];
+//	n[0] = normalized(zNormal)[0];
+//	n[1] = normalized(zNormal)[1];
+//	n[2] = normalized(zNormal)[2];
+//
+//	double j[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		j[i] = temp * n[i];
+//	}
+//
+//	//R: 投影后的点R
+//	double R[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		R[i] = Q[i] - j[i];
+//	}
+//
+//	//r: 投影后向量方向
+//	double r[3];
+//	for (int i = 0; i < 3; i++)
+//	{
+//		r[i] = R[i] - point[i];
+//	}
+//
+//	//结果写入projNor
+//	vector<double> projNor(3);
+//	for (int i = 0; i < 3; i++)
+//	{
+//		projNor[i] = r[i];
+//	}
+//
+//	return projNor;
+//}
+//
+//namespace {
+//	vtkSmartPointer<vtkUnstructuredGrid>
+//		ReadUnstructuredGrid(std::string const& fileName);
+//}
+//
+//static int N = 4; // N为厚度方向上网格层数
+//
+//int main(int argc, char* argv[])
+//{
+//	// Vis Pipeline
+//	vtkNew<vtkNamedColors> colors;
+//
+//	vtkNew<vtkRenderer> renderer;
+//
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->SetSize(640, 480);
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkNew<vtkRenderWindowInteractor> interactor;
+//	interactor->SetRenderWindow(renderWindow);
+//
+//	//renderer->SetBackground(colors->GetColor3d("Wheat").GetData());
+//	renderer->SetBackground(colors->GetColor3d("Black").GetData());
+//	renderer->UseHiddenLineRemovalOn();
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	//reader->SetFileName("Test01.vtk");
+//	//reader->SetFileName("step12.vtk");
+//	//reader->SetFileName("blade.vtk");
+//	//reader->SetFileName("plane.vtk");
+//	//reader->SetFileName("S.vtk");
+//	//reader->SetFileName("qu.vtk");
+//	reader->SetFileName("wave1.vtk");
+//	//reader->SetFileName("L2.vtk");
+//	//reader->SetFileName("bladeGmsh3_vtk.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	// 叉乘得到的法向
+//	vector<double> calNor;
+//
+//	// 单元中心坐标
+//	vector<double> centrePoint;
+//
+//	// 按文件内单元所包含节点编号，用每个单元的前三个节点来计算法向
+//	// drag输出后的文件单元包含节点的编号顺序为按拉伸顺序从上往下排序，所以前四个节点id一定比后四个节点id小
+//	// linear drag按照单元id依次编号，顺序为第一层2D单元，然后在某个2D单元往下拉伸N个并按序编号，再下一个2D单元，重复， \
+//	// \ 所以每个单元的后四个节点id为按偏置方向往下的下一个网格的前四个节点id
+//	for (int i = 0; i < unstructuredGrid->GetNumberOfCells(); i++)
+//	{
+//		vector<double> p1, p2, p3, p4, p5, p6, p7, p8;
+//
+//		//get单元i包含的所有点的id
+//		vtkIdList* pointList = unstructuredGrid->GetCell(i)->GetPointIds();
+//		int id0 = pointList->GetId(0);
+//		int id1 = pointList->GetId(1);
+//		int id2 = pointList->GetId(2);
+//		int id3 = pointList->GetId(3);
+//		int id4 = pointList->GetId(4);
+//		int id5 = pointList->GetId(5);
+//		int id6 = pointList->GetId(6);
+//		int id7 = pointList->GetId(7);
+//
+//		double* coors1 = unstructuredGrid->GetPoint(id0);
+//		p1.push_back(*coors1);
+//		p1.push_back(*(coors1 + 1));
+//		p1.push_back(*(coors1 + 2));
+//
+//		double* coors2 = unstructuredGrid->GetPoint(id1);
+//		p2.push_back(*coors2);
+//		p2.push_back(*(coors2 + 1));
+//		p2.push_back(*(coors2 + 2));
+//
+//		double* coors3 = unstructuredGrid->GetPoint(id2);
+//		p3.push_back(*coors3);
+//		p3.push_back(*(coors3 + 1));
+//		p3.push_back(*(coors3 + 2));
+//
+//		double* coors4 = unstructuredGrid->GetPoint(id3);
+//		p4.push_back(*coors4);
+//		p4.push_back(*(coors4 + 1));
+//		p4.push_back(*(coors4 + 2));
+//
+//		double* coors5 = unstructuredGrid->GetPoint(id4);
+//		p5.push_back(*coors5);
+//		p5.push_back(*(coors5 + 1));
+//		p5.push_back(*(coors5 + 2));
+//
+//		double* coors6 = unstructuredGrid->GetPoint(id5);
+//		p6.push_back(*coors6);
+//		p6.push_back(*(coors6 + 1));
+//		p6.push_back(*(coors6 + 2));
+//
+//		double* coors7 = unstructuredGrid->GetPoint(id6);
+//		p7.push_back(*coors7);
+//		p7.push_back(*(coors7 + 1));
+//		p7.push_back(*(coors7 + 2));
+//
+//		double* coors8 = unstructuredGrid->GetPoint(id7);
+//		p8.push_back(*coors8);
+//		p8.push_back(*(coors8 + 1));
+//		p8.push_back(*(coors8 + 2));
+//
+//		Vector3 cal_nor = getNormal(p1, p2, p3);
+//
+//		// 把p1 p2 p3平面的法向按顺序存进calNor
+//		calNor.push_back(cal_nor.x());
+//		calNor.push_back(cal_nor.y());
+//		calNor.push_back(cal_nor.z());
+//
+//		double x = (p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double y = (p1[1] + p2[1] + p3[1] + p4[1] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//		double z = (p1[2] + p2[2] + p3[2] + p4[2] + p5[0] + p6[0] + p7[0] + p8[0]) / 8;
+//
+//		// 把i单元的中心点按顺序存进centrePoint
+//		centrePoint.push_back(x);
+//		centrePoint.push_back(y);
+//		centrePoint.push_back(z);
+//	}
+//
+//	// ofs2保存第一层单元法向
+//	ofstream ofs2;
+//	ofs2.open("calculate_Normal_firstLay.txt", ios::out);
+//	ofs2 << "For first lay ---------------------: \n";
+//
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs2 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	/*------------------------------数据可视化------------------------------*/
+//	vtkNew<vtkDataSetMapper> dataSetMapper;
+//	dataSetMapper->SetInputData(unstructuredGrid);
+//	dataSetMapper->ScalarVisibilityOff();
+//
+//	vtkNew<vtkProperty> backProp;
+//	backProp->SetDiffuseColor(colors->GetColor3d("Banana").GetData());
+//	backProp->SetSpecular(.6);
+//	backProp->SetSpecularPower(30);
+//
+//	vtkNew<vtkActor> actor;
+//	actor->SetMapper(dataSetMapper);
+//	actor->SetBackfaceProperty(backProp);
+//	actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("Tomato").GetData());
+//	actor->GetProperty()->SetSpecular(.3);
+//	actor->GetProperty()->SetSpecularPower(30);
+//	actor->GetProperty()->EdgeVisibilityOn();
+//	renderer->AddActor(actor);
+//
+//	// 表面法线可视化数据集
+//	// unstructuredGrid 转换成 polydata
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> surfaceFilter =
+//		vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	surfaceFilter->SetInputData(unstructuredGrid);
+//	surfaceFilter->Update();
+//	vtkPolyData* polydata = surfaceFilter->GetOutput();
+//
+//	vtkSmartPointer<vtkPolyDataNormals> pdNormals =
+//		vtkSmartPointer<vtkPolyDataNormals>::New();
+//	pdNormals->SetInputConnection(surfaceFilter->GetOutputPort());
+//	pdNormals->ComputeCellNormalsOn();
+//	pdNormals->Update();
+//
+//	vtkPointData* ptData = pdNormals->GetOutput()->GetPointData();
+//	/*-----------------------------------------------------------------*/
+//
+//	vector<double> kx;
+//	vector<double> ky;
+//
+//	//两个方向渗透率kx和ky
+//	vector<double> kxSet{ 1.0, 0.0, 0.0 };
+//	vector<double> kySet{ 0.0, 1.0, 0.0 };
+//
+//	//渗透率方向和基准轴夹角
+//	double theta = 30;
+//	theta = theta / 180 * 3.1415926;
+//
+//
+//	ofstream ofs1;
+//	ofs1.open("normalAndPoint.txt", ios::out);
+//	ofs1 << "For points ---------------------: \n";
+//
+//	// 投影
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		double point[3] = { centrePoint[i], centrePoint[i + 1], centrePoint[i + 2] };
+//		vector<double> n{ calNor[i], calNor[i + 1], calNor[i + 2] };
+//
+//		vector<double> xProjNor(3);	//x方向上的投影
+//
+//		xProjNor = projectionNormal(n, kxSet, point);
+//		// 计算出的kxSet放入kx中
+//		//kx.push_back(xProjNor[0]);
+//		//kx.push_back(xProjNor[1]);
+//		//kx.push_back(xProjNor[2]);
+//
+//		vector<double> yProjNor(3);	// y方向上投影
+//
+//		yProjNor = projectionNormal(n, kySet, point);
+//		// 计算出的kySet放入ky中
+//		//ky.push_back(yProjNor[0]);
+//		//ky.push_back(yProjNor[1]);
+//		//ky.push_back(yProjNor[2]);
+//
+//		double R[3][3];
+//		R[0][0] = cos(theta) + n[0] * n[0] * (1 - cos(theta));
+//		R[0][1] = n[0] * n[1] * (1 - cos(theta)) - n[2] * sin(theta);
+//		R[0][2] = n[0] * n[2] * (1 - cos(theta)) + n[1] * sin(theta);
+//		R[1][0] = n[1] * n[0] * (1 - cos(theta)) + n[2] * sin(theta);
+//		R[1][1] = cos(theta) + n[1] * n[1] * (1 - cos(theta));
+//		R[1][2] = n[1] * n[2] * (1 - cos(theta)) - n[0] * sin(theta);
+//		R[2][0] = n[2] * n[0] * (1 - cos(theta)) - n[1] * sin(theta);
+//		R[2][1] = n[2] * n[1] * (1 - cos(theta)) + n[0] * sin(theta);
+//		R[2][2] = cos(theta) + n[2] * n[2] * (1 - cos(theta));
+//
+//		vector<double> x(3);
+//		vector<double> y(3);
+//
+//		x[0] = R[0][0] * xProjNor[0] + R[0][1] * xProjNor[1] + R[0][2] * xProjNor[2];
+//		x[1] = R[1][0] * xProjNor[0] + R[1][1] * xProjNor[1] + R[1][2] * xProjNor[2];
+//		x[2] = R[2][0] * xProjNor[0] + R[2][1] * xProjNor[1] + R[2][2] * xProjNor[2];
+//
+//		y[0] = R[0][0] * yProjNor[0] + R[0][1] * yProjNor[1] + R[0][2] * yProjNor[2];
+//		y[1] = R[1][0] * yProjNor[0] + R[1][1] * yProjNor[1] + R[1][2] * yProjNor[2];
+//		y[2] = R[2][0] * yProjNor[0] + R[2][1] * yProjNor[1] + R[2][2] * yProjNor[2];
+//
+//		kx.push_back(x[0]);
+//		kx.push_back(x[1]);
+//		kx.push_back(x[2]);
+//
+//		ky.push_back(y[0]);
+//		ky.push_back(y[1]);
+//		ky.push_back(y[2]);
+//	}
+//
+//	ofs1 << "For Normals  kx  ---------------------: \n";
+//	for (int i = 0; i < kx.size(); i += 3)
+//	{
+//		ofs1 << kx[i] << " " << kx[i + 1] << " " << kx[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  ky  ---------------------: \n";
+//	for (int i = 0; i < ky.size(); i += 3)
+//	{
+//		ofs1 << ky[i] << " " << ky[i + 1] << " " << ky[i + 2] << endl;
+//	}
+//
+//	ofs1 << "For Normals  kz  ---------------------: \n";
+//	for (int i = 0; i < calNor.size(); i += 3)
+//	{
+//		ofs1 << calNor[i] << " " << calNor[i + 1] << " " << calNor[i + 2] << endl;
+//	}
+//
+//	vtkNew<vtkGlyphSource2D>arrow;//二维箭头
+//	arrow->SetGlyphTypeToArrow();
+//	arrow->FilledOff();
+//
+//	vtkSmartPointer<vtkTransform> transform =
+//		vtkSmartPointer<vtkTransform>::New();
+//	transform->RotateY(180); // make vertex outside
+//	vtkSmartPointer<vtkTransformPolyDataFilter> transformF =
+//		vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+//	//transformF->SetInputConnection(cone->GetOutputPort());
+//	transformF->SetInputConnection(arrow->GetOutputPort());
+//	transformF->SetTransform(transform);
+//
+//	vtkSmartPointer<vtkGlyph3D> glyph =
+//		vtkSmartPointer<vtkGlyph3D>::New();
+//	glyph->SetInputConnection(pdNormals->GetOutputPort());
+//	//glyph->SetSourceConnection(transformF->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetSourceConnection(arrow->GetOutputPort()); // source => transform => graph3D
+//	glyph->SetVectorModeToUseNormal();
+//	glyph->SetScaleModeToScaleByVector();
+//	glyph->SetScaleFactor(16);
+//
+//	vtkSmartPointer<vtkPolyDataMapper> spikeMapper =
+//		vtkSmartPointer<vtkPolyDataMapper>::New();
+//	spikeMapper->SetInputConnection(glyph->GetOutputPort());
+//
+//	vtkSmartPointer<vtkActor> spikeActor = vtkSmartPointer<vtkActor>::New();
+//	spikeActor->SetMapper(spikeMapper);
+//	spikeActor->GetProperty()->SetColor(0.0, 0.79, 0.34);
+//
+//	// Add the actors to the renderer, set the background and size
+//	//renderer->AddActor(surfaceActor);
+//	renderer->AddActor(spikeActor);
+//	renderer->GetActiveCamera()->Azimuth(45);
+//	renderer->GetActiveCamera()->Elevation(45);
+//	renderer->ResetCamera();
+//	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+//	renderWindow->Render();
+//	interactor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+
+
+//框选
+
+#include <vtkAppendFilter.h>
+#include <vtkSphereSource.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkXMLUnstructuredGridReader.h>
+
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkDataSetMapper.h>
+#include <vtkNamedColors.h>
+#include <vtkNew.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
+
+#include <algorithm>
+#include <array>
+#include <string>
+
+#include "vtkPolyDataReader.h"
+#include <vtkSmartPointer.h>
+#include <vtkRendererCollection.h>
+#include <vtkDataSetMapper.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkIdTypeArray.h>
+#include <vtkTriangleFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkCommand.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkPolyData.h>
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
+#include <vtkPlaneSource.h>
+#include <vtkCellPicker.h>
+#include <vtkProperty.h>
+#include <vtkObjectFactory.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkUnstructuredGridReader.h>
+#include "vtkDecimatePro.h"
+#include "vtkSmoothPolyDataFilter.h"
+#include "vtkPolyDataNormals.h"
+#include "vtkAppendFilter.h"
+#include "vtkDataSetCollection.h"
+#include "vtkCollection.h"
+#include "vtkType.h"
+#include "vtkDataSet.h"
+#include "vtkAreaPicker.h"
+#include "vtkInteractorStyleRubberBandPick.h"
+#include "vtkPlanes.h"
+#include "vtkExtractGeometry.h"
+#include <vtkPicker.h>
+#include <vtkExtractSelectedFrustum.h>
+#include <vtkExtractPolyDataGeometry.h>
+#include <vtkPlane.h>
+#include <vtkPolyData.h>
+#include <vtkPlaneSource.h>
+
+namespace {
+	vtkSmartPointer<vtkUnstructuredGrid>
+		ReadUnstructuredGrid(std::string const& fileName);
+}
+
+class InteractorStyle : public vtkInteractorStyleRubberBandPick
+{
+public:
+	static InteractorStyle* New();
+	vtkTypeMacro(InteractorStyle, vtkInteractorStyleRubberBandPick);
+
+	InteractorStyle()
+	{
+		selectedMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+		selectedActor = vtkSmartPointer<vtkActor>::New();
+	}
+
+	virtual void OnLeftButtonUp()
+	{
+		// Forward events
+		vtkNew<vtkNamedColors> colors;
+		vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
+
+		vtkPlanes* frustum = static_cast<vtkAreaPicker*>(this->GetInteractor()->GetPicker())->GetFrustum();
+		vtkPoints* points = static_cast<vtkAreaPicker*>(this->GetInteractor()->GetPicker())->GetClipPoints();
+		cout << points->GetPoint(0)[0] << " " << points->GetPoint(0)[1] << " " << points->GetPoint(0)[2] << endl;
+		cout << points->GetPoint(1)[0] << " " << points->GetPoint(1)[1] << " " << points->GetPoint(1)[2] << endl;
+		cout << points->GetPoint(2)[0] << " " << points->GetPoint(2)[1] << " " << points->GetPoint(2)[2] << endl;
+		cout << points->GetPoint(3)[0] << " " << points->GetPoint(3)[1] << " " << points->GetPoint(3)[2] << endl;
+		cout << points->GetPoint(4)[0] << " " << points->GetPoint(4)[1] << " " << points->GetPoint(4)[2] << endl;
+		cout << points->GetPoint(5)[0] << " " << points->GetPoint(5)[1] << " " << points->GetPoint(5)[2] << endl;
+		cout << points->GetPoint(6)[0] << " " << points->GetPoint(6)[1] << " " << points->GetPoint(6)[2] << endl;
+		cout << points->GetPoint(7)[0] << " " << points->GetPoint(7)[1] << " " << points->GetPoint(7)[2] << endl;
+		cout << endl;
+
+		vtkSmartPointer<vtkExtractGeometry> extractGeometry =
+			vtkSmartPointer<vtkExtractGeometry>::New();
+		extractGeometry->SetImplicitFunction(frustum);
+
+		extractGeometry->SetInputData(this->Data);
+
+		extractGeometry->Update();
+		this->selectedMapper->SetInputConnection(extractGeometry->GetOutputPort());
+		this->selectedMapper->ScalarVisibilityOff();
+
+		this->selectedActor->SetMapper(selectedMapper);
+
+		this->selectedActor->GetProperty()->EdgeVisibilityOn();
+		this->selectedActor->GetProperty()->SetColor(
+			colors->GetColor3d("Tomato").GetData());
+
+		// this->selectedActor->GetProperty()->SetLineWidth(3);
+
+		//this->CurrentRenderer->AddActor(SelectedActor);
+		this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(selectedActor);
+		this->GetInteractor()->GetRenderWindow()->Render();
+	}
+
+	vtkSmartPointer<vtkUnstructuredGrid> Data;
+	vtkSmartPointer<vtkDataSetMapper> selectedMapper;
+	vtkSmartPointer<vtkActor> selectedActor;
+
+};
+
+
+vtkStandardNewMacro(InteractorStyle);
+
+
+int main(int argc, char* argv[])
+{
+	// Vis Pipeline
+	vtkNew<vtkNamedColors> colors;
+
+	vtkNew<vtkRenderer> renderer;
+
+	vtkNew<vtkRenderWindow> renderWindow;
+	renderWindow->SetSize(640, 480);
+	renderWindow->AddRenderer(renderer);
+
+	vtkNew<vtkRenderWindowInteractor> interactor;
+	interactor->SetRenderWindow(renderWindow);
+
+	renderer->SetBackground(colors->GetColor3d("PaleTurquoise").GetData());
+	renderer->UseHiddenLineRemovalOn();
+
+	vtkNew<vtkUnstructuredGridReader> reader;
+	reader->SetFileName("wave1.vtk");
+	reader->Update();
+
+	auto unstructuredGrid = reader->GetOutput();
+
+	// Visualize
+	vtkNew<vtkDataSetMapper> mapper;
+	mapper->SetInputData(unstructuredGrid);
+	mapper->ScalarVisibilityOff();
+
+	vtkNew<vtkProperty> backProp;
+	backProp->SetDiffuseColor(colors->GetColor3d("SeaGreen").GetData());
+	backProp->SetSpecular(.6);
+	backProp->SetSpecularPower(30);
+
+	vtkNew<vtkActor> actor;
+	actor->SetMapper(mapper);
+	actor->SetBackfaceProperty(backProp);
+	actor->GetProperty()->SetDiffuseColor(colors->GetColor3d("SeaGreen").GetData());
+	actor->GetProperty()->SetSpecular(.3);
+	actor->GetProperty()->SetSpecularPower(30);
+	actor->GetProperty()->EdgeVisibilityOn();
+	renderer->AddActor(actor);
+	renderer->GetActiveCamera()->Azimuth(45);
+	renderer->GetActiveCamera()->Elevation(45);
+	renderer->ResetCamera();
+
+	vtkSmartPointer<vtkAreaPicker> areaPicker = vtkSmartPointer<vtkAreaPicker>::New();
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	renderWindowInteractor->SetRenderWindow(renderWindow);
+	renderWindowInteractor->SetPicker(areaPicker);
+	renderWindowInteractor->Initialize();
+
+	// Set the custom stype to use for interaction.
+	vtkSmartPointer<InteractorStyle> style =
+		vtkSmartPointer<InteractorStyle>::New();
+	//style->SetDefaultRenderer(renderer);
+	style->Data = unstructuredGrid;
+
+	renderWindowInteractor->SetInteractorStyle(style);
+
+	renderWindow->SetWindowName("ReadAllUnstructuredGridTypes");
+	renderWindow->Render();
+	interactor->Start();
+
+	return EXIT_SUCCESS;
+}
+
+
+
+
+//cellPicker
+
+//#include <vtkActor.h>
+//#include <vtkCellArray.h>
+//#include <vtkCellPicker.h>
+//#include <vtkCommand.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkExtractSelection.h>
+//#include <vtkIdTypeArray.h>
+//#include <vtkInteractorStyleTrackballCamera.h>
+//#include <vtkNamedColors.h>
+//#include <vtkNew.h>
+//#include <vtkObjectFactory.h>
+//#include <vtkPlaneSource.h>
+//#include <vtkPoints.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkRenderer.h>
+//#include <vtkRendererCollection.h>
+//#include <vtkSelection.h>
+//#include <vtkSelectionNode.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkTriangleFilter.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredDataReader.h>
+//
+//namespace {
+//
+//	// Catch mouse events
+//	class MouseInteractorStyle : public vtkInteractorStyleTrackballCamera
+//	{
+//	public:
+//		static MouseInteractorStyle* New();
+//
+//		MouseInteractorStyle()
+//		{
+//			selectedMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+//			selectedActor = vtkSmartPointer<vtkActor>::New();
+//		}
+//
+//		virtual void OnLeftButtonDown() override
+//		{
+//			vtkNew<vtkNamedColors> colors;
+//
+//			// Get the location of the click (in window coordinates)
+//			int* pos = this->GetInteractor()->GetEventPosition();
+//
+//			vtkNew<vtkCellPicker> picker;
+//			picker->SetTolerance(0.0005);
+//
+//			// Pick from this location.
+//			picker->Pick(pos[0], pos[1], 0, this->GetDefaultRenderer());
+//
+//			double* worldPosition = picker->GetPickPosition();
+//			std::cout << "Cell id is: " << picker->GetCellId() << std::endl;
+//			std::cout << "Pick Screen is: (" << pos[0] << ", "
+//				<< pos[1] << ", " << 0 << ")" << endl;
+//
+//			if (picker->GetCellId() != -1)
+//			{
+//
+//				std::cout << "Pick position is: (" << worldPosition[0] << ", "
+//					<< worldPosition[1] << ", " << worldPosition[2] << ")" << endl;
+//
+//				vtkNew<vtkIdTypeArray> ids;
+//				ids->SetNumberOfComponents(1);
+//				ids->InsertNextValue(picker->GetCellId());
+//
+//				vtkNew<vtkSelectionNode> selectionNode;
+//				selectionNode->SetFieldType(vtkSelectionNode::CELL);
+//				selectionNode->SetContentType(vtkSelectionNode::INDICES);
+//				selectionNode->SetSelectionList(ids);
+//
+//				vtkNew<vtkSelection> selection;
+//				selection->AddNode(selectionNode);
+//
+//				vtkNew<vtkExtractSelection> extractSelection;
+//				extractSelection->SetInputData(0, this->Data);
+//				extractSelection->SetInputData(1, selection);
+//				extractSelection->Update();
+//
+//				// In selection
+//				vtkNew<vtkUnstructuredGrid> selected;
+//				selected->ShallowCopy(extractSelection->GetOutput());
+//
+//				std::cout << "Number of points in the selection: "
+//					<< selected->GetNumberOfPoints() << std::endl;
+//				std::cout << "Number of cells in the selection : "
+//					<< selected->GetNumberOfCells() << std::endl;
+//				selectedMapper->SetInputData(selected);
+//				selectedActor->SetMapper(selectedMapper);
+//				selectedActor->GetProperty()->EdgeVisibilityOn();
+//				selectedActor->GetProperty()->SetColor(
+//					colors->GetColor3d("Tomato").GetData());
+//
+//				selectedActor->GetProperty()->SetLineWidth(3);
+//
+//				this->Interactor->GetRenderWindow()
+//					->GetRenderers()
+//					->GetFirstRenderer()
+//					->AddActor(selectedActor);
+//			}
+//			// Forward events
+//			vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+//		}
+//
+//		//vtkSmartPointer<vtkPolyData> Data;
+//		vtkSmartPointer<vtkUnstructuredGrid> Data;
+//		vtkSmartPointer<vtkDataSetMapper> selectedMapper;
+//		vtkSmartPointer<vtkActor> selectedActor;
+//	};
+//
+//	vtkStandardNewMacro(MouseInteractorStyle);
+//
+//} // namespace
+//
+//int main(int, char* [])
+//{
+//	vtkNew<vtkNamedColors> colors;
+//
+//	//vtkNew<vtkPlaneSource> planeSource;
+//	//planeSource->Update();
+//
+//	//vtkNew<vtkTriangleFilter> triangleFilter;
+//	//triangleFilter->SetInputConnection(planeSource->GetOutputPort());
+//	//triangleFilter->Update();
+//
+//	//vtkNew<vtkPolyDataMapper> mapper;
+//	//mapper->SetInputConnection(triangleFilter->GetOutputPort());
+//
+//	vtkNew<vtkUnstructuredGridReader> reader;
+//	reader->SetFileName("wave1.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	// Visualize
+//	vtkNew<vtkDataSetMapper> mapper;
+//	mapper->SetInputData(unstructuredGrid);
+//	mapper->ScalarVisibilityOff();
+//
+//
+//	vtkNew<vtkActor> actor;
+//	actor->GetProperty()->SetColor(colors->GetColor3d("SeaGreen").GetData());
+//	actor->GetProperty()->SetEdgeVisibility(true);
+//	actor->SetMapper(mapper);
+//
+//	vtkNew<vtkRenderer> renderer;
+//	vtkNew<vtkRenderWindow> renderWindow;
+//	renderWindow->AddRenderer(renderer);
+//	renderWindow->SetWindowName("CellPicking");
+//
+//	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//	renderWindowInteractor->Initialize();
+//
+//	// Set the custom stype to use for interaction.
+//	vtkNew<MouseInteractorStyle> style;
+//	style->SetDefaultRenderer(renderer);
+//	//style->Data = triangleFilter->GetOutput();
+//	style->Data = unstructuredGrid;
+//
+//	renderWindowInteractor->SetInteractorStyle(style);
+//
+//	renderer->AddActor(actor);
+//	renderer->ResetCamera();
+//
+//	renderer->SetBackground(colors->GetColor3d("PaleTurquoise").GetData());
+//
+//	renderWindow->Render();
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
+//}
+
+
+// An highlighted block 框选表面surface单元
+
+//#include <vtkVersion.h>
+//
+//#include <vtkActor.h>
+//#include <vtkAreaPicker.h>
+//#include <vtkDataSetMapper.h>
+//#include <vtkDataSetSurfaceFilter.h>
+//#include <vtkExtractPolyDataGeometry.h>
+//#include <vtkIdFilter.h>
+//#include <vtkIdTypeArray.h>
+//#include <vtkInteractorStyleRubberBandPick.h>
+//#include <vtkObjectFactory.h>
+//#include <vtkPlanes.h>
+//#include <vtkPointData.h>
+//#include <vtkPolyData.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkProperty.h>
+//#include <vtkRenderer.h>
+//#include <vtkRendererCollection.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkSphereSource.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkVersion.h>
+//#include <vtkVertexGlyphFilter.h>
+//#include <vtkUnstructuredGrid.h>
+//#include <vtkUnstructuredGridReader.h>
+//#include <vtkXMLUnstructuredDataReader.h>
+//#include <vtkXMLUnstructuredGridReader.h>
+//#include <vtkDataSetMapper.h>
+//
+//
+//#define VTKISRBP_ORIENT 0
+//#define VTKISRBP_SELECT 1
+//
+//// Define interaction style
+//class HighlightInteractorStyle : public vtkInteractorStyleRubberBandPick
+//{
+//public:
+//	static HighlightInteractorStyle* New();
+//	vtkTypeMacro(HighlightInteractorStyle, vtkInteractorStyleRubberBandPick);
+//
+//	HighlightInteractorStyle() : vtkInteractorStyleRubberBandPick()
+//	{
+//		this->SelectedMapper = vtkSmartPointer<vtkDataSetMapper>::New();
+//		this->SelectedActor = vtkSmartPointer<vtkActor>::New();
+//		this->SelectedActor->SetMapper(SelectedMapper);
+//	}
+//
+//	virtual void OnLeftButtonUp()
+//	{
+//		// Forward events
+//		vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
+//
+//		if (this->CurrentMode == VTKISRBP_SELECT)
+//		{
+//			vtkPlanes* frustum = static_cast<vtkAreaPicker*>(this->GetInteractor()->GetPicker())->GetFrustum();
+//
+//			vtkSmartPointer<vtkExtractPolyDataGeometry> extractPolyDataGeometry =
+//				vtkSmartPointer<vtkExtractPolyDataGeometry>::New();
+//
+//			extractPolyDataGeometry->SetInputData(this->PolyData);
+//
+//			extractPolyDataGeometry->SetImplicitFunction(frustum);
+//			extractPolyDataGeometry->Update();
+//
+//			std::cout << "Extracted " << extractPolyDataGeometry->GetOutput()->GetNumberOfCells() << " cells." << std::endl;
+//
+//			this->SelectedMapper->SetInputData(extractPolyDataGeometry->GetOutput());
+//			this->SelectedMapper->ScalarVisibilityOff();
+//
+//			this->SelectedActor->GetProperty()->SetColor(1.0, 0.0, 0.0); //(R,G,B)
+//			this->SelectedActor->GetProperty()->SetPointSize(5);
+//
+//			this->GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(SelectedActor);
+//			this->GetInteractor()->GetRenderWindow()->Render();
+//			this->HighlightProp(NULL);
+//		}
+//	}
+//
+//	void SetPolyData(vtkSmartPointer<vtkPolyData> polyData) { this->PolyData = polyData; }
+//private:
+//	vtkSmartPointer<vtkPolyData> PolyData;
+//	vtkSmartPointer<vtkActor> SelectedActor;
+//	vtkSmartPointer<vtkDataSetMapper> SelectedMapper;
+//
+//};
+//vtkStandardNewMacro(HighlightInteractorStyle);
+//
+//int main(int, char* [])
+//{
+//	//vtkSmartPointer<vtkSphereSource> sphereSource =
+//	//	vtkSmartPointer<vtkSphereSource>::New();
+//	//sphereSource->Update();
+//
+//	vtkSmartPointer<vtkUnstructuredGridReader> reader = 
+//		vtkSmartPointer<vtkUnstructuredGridReader>::New();
+//	reader->SetFileName("wave1.vtk");
+//	reader->Update();
+//
+//	auto unstructuredGrid = reader->GetOutput();
+//
+//	vtkSmartPointer<vtkIdFilter> idFilter =
+//		vtkSmartPointer<vtkIdFilter>::New();
+//	//idFilter->SetInputConnection(sphereSource->GetOutputPort());
+//	idFilter->SetInputData(unstructuredGrid);
+//	idFilter->Update();
+//
+//	// This is needed to convert the ouput of vtkIdFilter (vtkDataSet) back to vtkPolyData
+//	vtkSmartPointer<vtkDataSetSurfaceFilter> surfaceFilter =
+//		vtkSmartPointer<vtkDataSetSurfaceFilter>::New();
+//	surfaceFilter->SetInputConnection(idFilter->GetOutputPort());
+//	surfaceFilter->Update();
+//
+//	vtkPolyData* input = surfaceFilter->GetOutput();
+//
+//	// Create a mapper and actor
+//	vtkSmartPointer<vtkDataSetMapper> mapper =
+//		vtkSmartPointer<vtkDataSetMapper>::New();
+//	mapper->SetInputData(unstructuredGrid);
+//	mapper->ScalarVisibilityOff();
+//
+//	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+//	actor->SetMapper(mapper);
+//	actor->GetProperty()->SetPointSize(5);
+//
+//	// Visualize
+//	vtkSmartPointer<vtkRenderer> renderer =
+//		vtkSmartPointer<vtkRenderer>::New();
+//	vtkSmartPointer<vtkRenderWindow> renderWindow =
+//		vtkSmartPointer<vtkRenderWindow>::New();
+//	renderWindow->AddRenderer(renderer);
+//
+//	vtkSmartPointer<vtkAreaPicker> areaPicker =
+//		vtkSmartPointer<vtkAreaPicker>::New();
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	renderWindowInteractor->SetPicker(areaPicker);
+//	renderWindowInteractor->SetRenderWindow(renderWindow);
+//
+//	renderer->AddActor(actor);
+//	//renderer->SetBackground(1,1,1); // Background color white
+//
+//	renderWindow->Render();
+//
+//	vtkSmartPointer<HighlightInteractorStyle> style =
+//		vtkSmartPointer<HighlightInteractorStyle>::New();
+//	style->SetPolyData(input);
+//	renderWindowInteractor->SetInteractorStyle(style);
+//
+//	renderWindowInteractor->Start();
+//
+//	return EXIT_SUCCESS;
 //}
